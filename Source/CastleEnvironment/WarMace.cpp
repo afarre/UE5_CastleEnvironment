@@ -41,19 +41,7 @@ void AWarMace::NotifyActorBeginOverlap(AActor* OtherActor) {
 	Super::NotifyActorBeginOverlap(OtherActor);
 	// Notifies when hitting the capsule component
 	UE_LOG(LogTemp, Warning, TEXT("NotifyActorBeginOverlap weapon"),);
-
-	// TODO: Display "Press E to pick up" in HUD
-	/*
-	
-	APirate* APirate = Cast<class APirate>(GetWorld()->GetFirstPlayerController()->GetCharacter());
-	if (APirate->Interacting) {
-		StaticMesh->SetSimulatePhysics(false);
-		StaticMesh->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
-		StaticMesh->AttachToComponent(APirate->GetMesh(),  FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("LeftWeapon"));
-	} else {
-		
-	}
-*/
+	MyGameStateBase->DisplayPrompt();
 }
 
 // Called every frame

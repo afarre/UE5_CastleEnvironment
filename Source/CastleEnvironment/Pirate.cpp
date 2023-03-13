@@ -12,7 +12,6 @@
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 APirate::APirate() {
@@ -145,11 +144,9 @@ void APirate::StartInteract(const FInputActionValue& Value) {
 		Interacting = Value.Get<bool>();
 		TSet<AActor*> OverlappingActors;
 		GetOverlappingActors(OverlappingActors);
-		constexpr int NumberElements = 0;
-		OverlappingActors.Empty(NumberElements);
-		if constexpr (NumberElements > 0) {
+		if (const int NumberElements = OverlappingActors.Num(); NumberElements > 0) {
 			UE_LOG(LogTemp, Warning, TEXT("InteractWithOverlap"),);
-			MyGameStateBase->InteractWithOverlap(this, OverlappingActors);
+			MyGameStateBase->InteractWithOverlap(this, OverlappingActors, GetWorld());
 		}
 		//const AWarMace* AWarMAce = Cast<class AWarMace>(GetWorld()->GetFirstPlayerController()->GetCharacter());;
 	}
@@ -165,7 +162,7 @@ void APirate::CompletedInteract(const FInputActionValue& Value) {
 void APirate::CanceledInteract(const FInputActionValue& Value) {
 	if (GetController()) {
 		Interacting = Value.Get<bool>();
-		UE_LOG(LogTemp, Warning, TEXT("Caceled Interacting Value = %d"), Value.Get<bool>());
+		UE_LOG(LogTemp, Warning, TEXT("Canceled Interacting Value = %d"), Value.Get<bool>());
 	}
 }
 

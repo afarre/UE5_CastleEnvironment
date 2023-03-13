@@ -7,7 +7,16 @@
 #include "ParentCharacter.h"
 #include "Pirate.h"
 #include "WarMace.h"
+#include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
+
+// Called when the game starts or when spawned
+void AMyGameStateBase::BeginPlay()
+{
+	Super::BeginPlay();
+
+
+}
 
 void AMyGameStateBase::TakeDamage(AParentCharacter* Actor, float DamageAmount) const {
 	if (Actor) {
@@ -27,22 +36,31 @@ void AMyGameStateBase::TakeDamage(AParentCharacter* Actor, float DamageAmount) c
 	}
 }
 
-void AMyGameStateBase::InteractWithOverlap(APirate* Pirate, TSet<AActor*> OverlappingActors) {
+void AMyGameStateBase::InteractWithOverlap(APirate* Pirate, TSet<AActor*> OverlappingActors, UWorld* World) const {
 	// Fetch all actors of class AWarMace
 	TArray<AActor*> ActorsToFind;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AWarMace::StaticClass(), ActorsToFind);
+	if (World) {
+		UE_LOG(LogTemp, Warning, TEXT("got world"),);
+	
+		UGameplayStatics::GetAllActorsOfClass(World, AWarMace::StaticClass(), ActorsToFind);
 
-	// Iterate over each actor, casting it to AWarMace
-	for (AActor* Actor: ActorsToFind) {
-		if (const AWarMace* WarMace = Cast<AWarMace>(Actor)) {
-			// Check if the item we are iterating over is overlapping with the pirate
-			if (OverlappingActors.Contains(WarMace)) {
-				UE_LOG(LogTemp, Warning, TEXT("I'm interacting with a War mace"),);
+		// Iterate over each actor, casting it to AWarMace
+		for (AActor* Actor: ActorsToFind) {
+			if (const AWarMace* WarMace = Cast<AWarMace>(Actor)) {
+				// Check if the item we are iterating over is overlapping with the pirate
+				if (OverlappingActors.Contains(WarMace)) {
+					UE_LOG(LogTemp, Warning, TEXT("I'm interacting with a War mace"),);
 				
-				WarMace->StaticMesh->SetSimulatePhysics(false);
-				WarMace->StaticMesh->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
-				WarMace->StaticMesh->AttachToComponent(Pirate->GetMesh(),  FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("LeftWeapon"));
+					WarMace->StaticMesh->SetSimulatePhysics(false);
+					WarMace->StaticMesh->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+					WarMace->StaticMesh->AttachToComponent(Pirate->GetMesh(),  FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("LeftWeapon"));
+				}
 			}
 		}
 	}
+}
+
+void AMyGameStateBase::DisplayPrompt() {
+
+	// TODO: Display "Press E to pick up" in HUD
 }
