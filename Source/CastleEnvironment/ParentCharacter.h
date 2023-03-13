@@ -4,7 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "MyGameStateBase.h"
 #include "ParentCharacter.generated.h"
+
+class AMyGameStateBase;
 
 UCLASS()
 class CASTLEENVIRONMENT_API AParentCharacter : public ACharacter
@@ -39,6 +42,8 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	AMyGameStateBase* MyGameStateBase;
 
 public:	
 	// Called every frame

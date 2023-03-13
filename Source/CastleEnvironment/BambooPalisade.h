@@ -3,15 +3,16 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+#include "ParentObject.h"
 #include "BambooPalisade.generated.h"
 
 // Forward declarations
 class UBoxComponent;
 class UStaticMeshComponent;
+class AMyGameStateBase;
 
 UCLASS()
-class CASTLEENVIRONMENT_API ABambooPalisade : public AActor
+class CASTLEENVIRONMENT_API ABambooPalisade : public AParentObject
 {
 	GENERATED_BODY()
 	
@@ -29,10 +30,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UStaticMeshComponent* StaticMesh;
-
-	// Functions
-	UFUNCTION(BlueprintCallable)
-	void TakeDamage(float DamageAmount);
 
 	// Detect collisions
 	UFUNCTION()

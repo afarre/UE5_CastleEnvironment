@@ -39,13 +39,14 @@ protected:
 
 	// Camera elements
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Components)
-		USpringArmComponent* CameraBoom;
+	USpringArmComponent* CameraBoom;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Components)
 	UCameraComponent* FollowCamera;
 	
 	// Create variable to select an Input Mapping Context (IMC_PirateContext) in the editor
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	// ReSharper disable once UnrealHeaderToolError
 	UInputMappingContext* PirateMappingContext;
 	
 	// Create variable to select an InputAction for an action in the editor

@@ -2,7 +2,6 @@
 
 #include "WarMace.h"
 
-
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
 
@@ -43,9 +42,10 @@ void AWarMace::NotifyActorBeginOverlap(AActor* OtherActor) {
 	// Notifies when hitting the capsule component
 	UE_LOG(LogTemp, Warning, TEXT("NotifyActorBeginOverlap weapon"),);
 
-	APirate* APirate = Cast<class APirate>(GetWorld()->GetFirstPlayerController()->GetCharacter());
-
 	// TODO: Display "Press E to pick up" in HUD
+	/*
+	
+	APirate* APirate = Cast<class APirate>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 	if (APirate->Interacting) {
 		StaticMesh->SetSimulatePhysics(false);
 		StaticMesh->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
@@ -53,7 +53,7 @@ void AWarMace::NotifyActorBeginOverlap(AActor* OtherActor) {
 	} else {
 		
 	}
-
+*/
 }
 
 // Called every frame

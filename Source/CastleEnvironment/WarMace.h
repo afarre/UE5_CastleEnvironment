@@ -4,12 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "ParentWeapon.h"
-#include "Pirate.h"
-#include "GameFramework/Actor.h"
 #include "WarMace.generated.h"
 
 class UBoxComponent;
 class UStaticMeshComponent;
+class AParentCharacter;
+class AParentWeapon;
+class AParentObject;
 
 UCLASS()
 class CASTLEENVIRONMENT_API AWarMace : public AParentWeapon
@@ -20,6 +21,9 @@ public:
 	// Sets default values for this actor's properties
 	AWarMace();
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UStaticMeshComponent* StaticMesh;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -27,10 +31,6 @@ protected:
 	// Create the collision capsule
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UBoxComponent* CollisionBox;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	UStaticMeshComponent* StaticMesh;
-
 	
 	// Functions
 	UFUNCTION()

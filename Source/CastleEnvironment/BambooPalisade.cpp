@@ -3,10 +3,9 @@
 
 #include "BambooPalisade.h"
 
-#include "Pirate.h"
+#include "ParentCharacter.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/BoxComponent.h"
-#include "Components/CapsuleComponent.h"
 
 // Sets default values
 ABambooPalisade::ABambooPalisade()
@@ -48,20 +47,10 @@ void ABambooPalisade::NotifyActorBeginOverlap(AActor* OtherActor) {
 	Super::NotifyActorBeginOverlap(OtherActor);
 	// Notifies when hitting the capsule component
 	UE_LOG(LogTemp, Warning, TEXT("NotifyActorBeginOverlap"),);
-	TakeDamage(.5f);
-}
-
-void ABambooPalisade::TakeDamage(float DamageAmount) {
-	const APirate* APirate = Cast<class APirate>(GetWorld()->GetFirstPlayerController()->GetCharacter());;
-	if (APirate) {
-		APirate->CurrentHealth = APirate->CurrentHealth - DamageAmount;
-		UE_LOG(LogTemp, Warning, TEXT("Damage taken: %f"), DamageAmount);
-		if (APirate->CurrentHealth <= 0) {
-			// Ragdoll
-			APirate->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-			APirate->GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-			APirate->GetMesh()->SetSimulatePhysics(true);
-		}
+	//const APirate* APirate = Cast<class APirate>(GetWorld()->GetFirstPlayerController()->GetCharacter());
+	if (AParentCharacter* ParentCharacter = Cast<AParentCharacter>(OtherActor)) {
+		MyGameStateBase->TakeDamage(ParentCharacter, .5f);
 	}
 }
+
 

@@ -4,25 +4,24 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "MyGameStateBase.h"
-#include "ParentWeapon.generated.h"
+#include "ParentObject.generated.h"
 
 class AMyGameStateBase;
 
 UCLASS()
-class CASTLEENVIRONMENT_API AParentWeapon : public AActor
+class CASTLEENVIRONMENT_API AParentObject : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	AParentWeapon();
+	AParentObject();
+
+	AMyGameStateBase* MyGameStateBase;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
-	AMyGameStateBase* MyGameStateBase;
 
 public:	
 	// Called every frame

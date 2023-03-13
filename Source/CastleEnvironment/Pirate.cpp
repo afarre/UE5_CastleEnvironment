@@ -2,14 +2,17 @@
 
 
 #include "Pirate.h"
+
 #include "EnhancedInputSubsystems.h"
 #include "Components/InputComponent.h"
 #include "EnhancedInputComponent.h"
 #include "VectorTypes.h"
+#include "WarMace.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 APirate::APirate() {
@@ -47,7 +50,6 @@ APirate::APirate() {
 	BaseDamage = .15f;
 
 	Interacting = false;
-	
 }
 
 // Called when the game starts or when spawned
@@ -130,7 +132,7 @@ void APirate::CameraZoom(const FInputActionValue& Value) {
 		if (DirectionValue.X != 0) {
 			const float NewTargetArmLenght = CameraBoom->TargetArmLength + (-DirectionValue.X * ZoomStep);
 			const FVector TransformedVector = FVector(0, 0, DirectionValue.X);
-			// TODO: Camera scroll range disparity may be due to the usage of FMath::Clamp and ClampVector respectively
+			// TODO: Camera scroll range disparity may be due to different implementations of FMath::Clamp and ClampVector
 			CameraBoom->SetRelativeLocation(ClampVector(CameraBoom->GetRelativeLocation() + (-TransformedVector * ZoomStep / 2), MinCameraHeight, MaxCameraHeight));
 			CameraBoom->TargetArmLength = FMath::Clamp(NewTargetArmLenght, MinCameraZoom, MaxCameraZoom);
 			UE_LOG(LogTemp, Warning, TEXT("Interacting value = %d"), Interacting);
@@ -141,21 +143,29 @@ void APirate::CameraZoom(const FInputActionValue& Value) {
 void APirate::StartInteract(const FInputActionValue& Value) {
 	if (GetController()) {
 		Interacting = Value.Get<bool>();
-			UE_LOG(LogTemp, Warning, TEXT("Start Interacting Value = %d"), Value.Get<bool>());
+		TSet<AActor*> OverlappingActors;
+		GetOverlappingActors(OverlappingActors);
+		constexpr int NumberElements = 0;
+		OverlappingActors.Empty(NumberElements);
+		if constexpr (NumberElements > 0) {
+			UE_LOG(LogTemp, Warning, TEXT("InteractWithOverlap"),);
+			MyGameStateBase->InteractWithOverlap(this, OverlappingActors);
+		}
+		//const AWarMace* AWarMAce = Cast<class AWarMace>(GetWorld()->GetFirstPlayerController()->GetCharacter());;
 	}
 }
 
 void APirate::CompletedInteract(const FInputActionValue& Value) {
 	if (GetController()) {
 		Interacting = Value.Get<bool>();
-		UE_LOG(LogTemp, Warning, TEXT("Start Interacting Value = %d"), Value.Get<bool>());
+		UE_LOG(LogTemp, Warning, TEXT("Completed Interacting Value = %d"), Value.Get<bool>());
 	}
 }
 
 void APirate::CanceledInteract(const FInputActionValue& Value) {
 	if (GetController()) {
 		Interacting = Value.Get<bool>();
-		UE_LOG(LogTemp, Warning, TEXT("Start Interacting Value = %d"), Value.Get<bool>());
+		UE_LOG(LogTemp, Warning, TEXT("Caceled Interacting Value = %d"), Value.Get<bool>());
 	}
 }
 
