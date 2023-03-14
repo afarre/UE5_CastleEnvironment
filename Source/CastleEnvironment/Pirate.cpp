@@ -142,7 +142,7 @@ void APirate::CameraZoom(const FInputActionValue& Value) {
 void APirate::StartInteract(const FInputActionValue& Value) {
 	if (GetController()) {
 		Interacting = Value.Get<bool>();
-		TSet<AActor*> OverlappingActors;
+		TArray<AActor*> OverlappingActors;
 		GetOverlappingActors(OverlappingActors);
 		if (const int NumberElements = OverlappingActors.Num(); NumberElements > 0) {
 			UE_LOG(LogTemp, Warning, TEXT("InteractWithOverlap"),);
@@ -157,6 +157,10 @@ void APirate::CompletedInteract(const FInputActionValue& Value) {
 		Interacting = Value.Get<bool>();
 		UE_LOG(LogTemp, Warning, TEXT("Completed Interacting Value = %d"), Value.Get<bool>());
 	}
+}
+
+void APirate::TestInteraction(const FInputActionValue& Value) {
+	MyGameStateBase->TestCounter();
 }
 
 void APirate::CanceledInteract(const FInputActionValue& Value) {
@@ -202,6 +206,7 @@ void APirate::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &APirate::StartInteract);
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Canceled, this, &APirate::CanceledInteract);
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Completed, this, &APirate::CompletedInteract);
+		EnhancedInputComponent->BindAction(TestAction, ETriggerEvent::Completed, this, &APirate::TestInteraction);
 	}
 }
 

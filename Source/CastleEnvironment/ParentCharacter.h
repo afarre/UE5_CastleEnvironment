@@ -7,6 +7,7 @@
 #include "MyGameStateBase.h"
 #include "ParentCharacter.generated.h"
 
+class UWidgetComponent;
 class AMyGameStateBase;
 
 UCLASS()
@@ -39,9 +40,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement)
 	mutable float MovementModifier;
 
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	UPROPERTY(VisibleAnywhere)
+	UWidgetComponent* HealthWidget;
 
 	AMyGameStateBase* MyGameStateBase;
 

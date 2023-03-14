@@ -1,13 +1,20 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "ParentCharacter.h"
+
+#include "HealthBar.h"
 #include "MyGameStateBase.h"
+#include "Components/WidgetComponent.h"
 
 // Sets default values
 AParentCharacter::AParentCharacter()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	// Create and attach the health bar
+	HealthWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("HealthBar"));
+	HealthWidget->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 	
 }
 
@@ -15,6 +22,9 @@ AParentCharacter::AParentCharacter()
 void AParentCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	UHealthBar* HealthBar = Cast<UHealthBar>(HealthWidget->GetUserWidgetObject());
+	HealthBar->SetParentCharacterOwner(this);
 
 	MyGameStateBase = Cast<AMyGameStateBase>(GetWorld()->GetGameState());
 

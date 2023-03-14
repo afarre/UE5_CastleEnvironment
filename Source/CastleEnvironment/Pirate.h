@@ -67,6 +67,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	UInputAction* InteractAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	UInputAction* TestAction;
 	
 	// Define functions with the value inputted when playing
 	void Move(const FInputActionValue& Value);
@@ -84,6 +87,8 @@ protected:
 	void StartInteract(const FInputActionValue& Value);
 	void CanceledInteract(const FInputActionValue& Value);
 	void CompletedInteract(const FInputActionValue& Value);
+
+	void TestInteraction(const FInputActionValue& Value);
 
 	UFUNCTION()
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;

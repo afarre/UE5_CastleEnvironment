@@ -49,7 +49,7 @@ void ABambooPalisade::NotifyActorBeginOverlap(AActor* OtherActor) {
 	UE_LOG(LogTemp, Warning, TEXT("NotifyActorBeginOverlap"),);
 	//const APirate* APirate = Cast<class APirate>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 	if (AParentCharacter* ParentCharacter = Cast<AParentCharacter>(OtherActor)) {
-		MyGameStateBase->TakeDamage(ParentCharacter, .5f);
+		MyGameStateBase->TakeDamage(ParentCharacter, .1f);
 	}
 }
 

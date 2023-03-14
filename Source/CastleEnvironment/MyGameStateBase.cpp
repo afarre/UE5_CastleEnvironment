@@ -10,14 +10,6 @@
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
 
-// Called when the game starts or when spawned
-void AMyGameStateBase::BeginPlay()
-{
-	Super::BeginPlay();
-
-
-}
-
 void AMyGameStateBase::TakeDamage(AParentCharacter* Actor, float DamageAmount) const {
 	if (Actor) {
 		Actor->CurrentHealth = Actor->CurrentHealth - DamageAmount;
@@ -36,13 +28,13 @@ void AMyGameStateBase::TakeDamage(AParentCharacter* Actor, float DamageAmount) c
 	}
 }
 
-void AMyGameStateBase::InteractWithOverlap(APirate* Pirate, TSet<AActor*> OverlappingActors, UWorld* World) const {
+void AMyGameStateBase::InteractWithOverlap(APirate* Pirate, TArray<AActor*> OverlappingActors, UWorld* World) const {
 	// Fetch all actors of class AWarMace
 	TArray<AActor*> ActorsToFind;
-	if (World) {
+	if (GetWorld()) {
 		UE_LOG(LogTemp, Warning, TEXT("got world"),);
 	
-		UGameplayStatics::GetAllActorsOfClass(World, AWarMace::StaticClass(), ActorsToFind);
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AWarMace::StaticClass(), ActorsToFind);
 
 		// Iterate over each actor, casting it to AWarMace
 		for (AActor* Actor: ActorsToFind) {
@@ -63,4 +55,8 @@ void AMyGameStateBase::InteractWithOverlap(APirate* Pirate, TSet<AActor*> Overla
 void AMyGameStateBase::DisplayPrompt() {
 
 	// TODO: Display "Press E to pick up" in HUD
+}
+
+void AMyGameStateBase::TestCounter() {
+	
 }
