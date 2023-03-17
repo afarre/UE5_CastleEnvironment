@@ -4,20 +4,20 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "MyGameStateBase.h"
-#include "ParentCharacter.generated.h"
+#include "ParentEnemy.generated.h"
 
 class UWidgetComponent;
 class AMyGameStateBase;
+class UHealthBar;
 
 UCLASS()
-class CASTLEENVIRONMENT_API AParentCharacter : public ACharacter
+class CASTLEENVIRONMENT_API AParentEnemy : public ACharacter
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this character's properties
-	AParentCharacter();
+	AParentEnemy();
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Combat)
 	mutable float CurrentHealth;
@@ -40,14 +40,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement)
 	mutable float MovementModifier;
 
-
+	UPROPERTY(VisibleAnywhere)
+	UWidgetComponent* HealthWidgetComponent;
+	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
-	UPROPERTY(VisibleAnywhere)
-	UWidgetComponent* HealthWidget;
-
+	
 	AMyGameStateBase* MyGameStateBase;
 
 public:	
@@ -56,5 +55,9 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	void UpdateHP() const;
 
+private:
+	UHealthBar* HealthBar;
+	
 };

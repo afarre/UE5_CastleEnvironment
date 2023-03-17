@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "MyGameStateBase.h"
 #include "ParentWeapon.generated.h"
 
 class AMyGameStateBase;

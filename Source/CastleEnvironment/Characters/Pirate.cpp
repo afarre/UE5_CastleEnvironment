@@ -7,10 +7,12 @@
 #include "Components/InputComponent.h"
 #include "EnhancedInputComponent.h"
 #include "VectorTypes.h"
-#include "WarMace.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
+#include "CastleEnvironment/MyGameStateBase.h"
+#include "CastleEnvironment/UI/PrimaryHUD.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
@@ -49,6 +51,9 @@ APirate::APirate() {
 	BaseDamage = .15f;
 
 	Interacting = false;
+	
+	// TODO: Destroy the HP bar widget in the pirate gracefully. For now setting size to 0
+	//HealthWidget->ConditionalBeginDestroy();
 }
 
 // Called when the game starts or when spawned
@@ -56,6 +61,9 @@ void APirate::BeginPlay() {
 	Super::BeginPlay();
 	CharacterMovementComponent = GetCharacterMovement();
 	CharacterMovementComponent->MaxWalkSpeed = BaseSpeed;
+
+	//HealthBarClass = Cast<UHealthBarWidgetClass>(HealthWidgetComponent->GetUserWidgetObject());
+	//HealthBarClass->SetPirateParent(this);
 	
 	// Get the player controller, though it needs to be casted from AController (getter) to APlayerController
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController())) {
@@ -146,9 +154,8 @@ void APirate::StartInteract(const FInputActionValue& Value) {
 		GetOverlappingActors(OverlappingActors);
 		if (const int NumberElements = OverlappingActors.Num(); NumberElements > 0) {
 			UE_LOG(LogTemp, Warning, TEXT("InteractWithOverlap"),);
-			MyGameStateBase->InteractWithOverlap(this, OverlappingActors, GetWorld());
+			MyGameStateBase->InteractWithOverlap(this, OverlappingActors);
 		}
-		//const AWarMace* AWarMAce = Cast<class AWarMace>(GetWorld()->GetFirstPlayerController()->GetCharacter());;
 	}
 }
 
@@ -208,5 +215,9 @@ void APirate::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Completed, this, &APirate::CompletedInteract);
 		EnhancedInputComponent->BindAction(TestAction, ETriggerEvent::Completed, this, &APirate::TestInteraction);
 	}
+}
+
+void APirate::UpdateWidgetHP(APrimaryHUD* PrimaryHUD) {
+	PrimaryHUD->UpdateHP(this);
 }
 

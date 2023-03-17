@@ -8,7 +8,7 @@
 
 class UBoxComponent;
 class UStaticMeshComponent;
-class AParentCharacter;
+class AParentEnemy;
 class AParentWeapon;
 class AParentObject;
 

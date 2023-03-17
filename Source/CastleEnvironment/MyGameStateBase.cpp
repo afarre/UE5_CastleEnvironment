@@ -4,31 +4,32 @@
 #include "MyGameStateBase.h"
 
 #include "Components/CapsuleComponent.h"
-#include "ParentCharacter.h"
-#include "Pirate.h"
-#include "WarMace.h"
+#include "Components/WidgetComponent.h"
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
+#include "Animation/WidgetAnimation.h"
+#include "Characters/ParentEnemy.h"
+#include "Characters/Pirate.h"
+#include "UI/PrimaryHUD.h"
+#include "Weapons/WarMace.h"
 
-void AMyGameStateBase::TakeDamage(AParentCharacter* Actor, float DamageAmount) const {
-	if (Actor) {
-		Actor->CurrentHealth = Actor->CurrentHealth - DamageAmount;
-		UE_LOG(LogTemp, Warning, TEXT("Damage taken: %f"), DamageAmount);
-		if (Actor->CurrentHealth <= 0) {
-			// Ragdoll if pirate
-			APirate* Pirate = Cast<APirate>(Actor);
-			if (Pirate) {
-				Pirate->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-                Pirate->GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-				Pirate->GetMesh()->SetSimulatePhysics(true);
-			}else {
-				// TODO: Implement death of non-Pirate characters, ie. enemies
-			}
-		}
+
+void AMyGameStateBase::TakeDamage(AActor* Actor, float DamageAmount) const {
+	APirate* Pirate = Cast<APirate>(Actor);
+	AParentEnemy* ParentEnemy = Cast<AParentEnemy>(Actor);
+
+	if (Pirate) {
+		UE_LOG(LogTemp, Warning, TEXT("Pirate damage taken: %f"), DamageAmount);
+		Pirate->CurrentHealth = Pirate->CurrentHealth - DamageAmount;
+		OnPlayerTakeDamage(Pirate);
+	} else if (ParentEnemy) {
+		UE_LOG(LogTemp, Warning, TEXT("Enemy amage taken: %f"), DamageAmount);
+		ParentEnemy->CurrentHealth = ParentEnemy->CurrentHealth - DamageAmount;
+		OnEnemyTakeDamage(ParentEnemy);
 	}
 }
 
-void AMyGameStateBase::InteractWithOverlap(APirate* Pirate, TArray<AActor*> OverlappingActors, UWorld* World) const {
+void AMyGameStateBase::InteractWithOverlap(APirate* Pirate, TArray<AActor*> OverlappingActors) const {
 	// Fetch all actors of class AWarMace
 	TArray<AActor*> ActorsToFind;
 	if (GetWorld()) {
@@ -59,4 +60,27 @@ void AMyGameStateBase::DisplayPrompt() {
 
 void AMyGameStateBase::TestCounter() {
 	
+}
+
+void AMyGameStateBase::OnPlayerTakeDamage(APirate* Pirate) const {
+	APrimaryHUD* PrimaryHUD = Cast<APrimaryHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
+	Pirate->UpdateWidgetHP(PrimaryHUD);
+	
+	if (Pirate->CurrentHealth <= 0) {
+		// Ragdoll
+		Pirate->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		Pirate->GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		Pirate->GetMesh()->SetSimulatePhysics(true);
+			
+		if (PrimaryHUD) {
+			PrimaryHUD->FadeHealthBarAnimation();
+		}
+	}
+}
+
+void AMyGameStateBase::OnEnemyTakeDamage(AParentEnemy* ParentEnemy) const {
+	ParentEnemy->UpdateHP();
+	if (ParentEnemy->CurrentHealth <= 0) {
+		// TODO: Ragdoll enemy
+	}
 }

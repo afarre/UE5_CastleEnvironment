@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "InputActionValue.h"
-#include "ParentCharacter.h"
+#include "ParentEnemy.h"
 #include "GameFramework/Character.h"
 #include "Pirate.generated.h"
 
@@ -14,10 +14,11 @@ class UInputAction;
 class USpringArmComponent;
 class UCameraComponent;
 class UCharacterMovementComponent;
+class APrimaryHUD;
 struct FInputActionValue;
 
 UCLASS()
-class CASTLEENVIRONMENT_API APirate : public AParentCharacter
+class CASTLEENVIRONMENT_API APirate : public ACharacter
 {
 	GENERATED_BODY()
 
@@ -31,10 +32,32 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	void UpdateWidgetHP(APrimaryHUD* PrimaryHUD);
+
 	bool Interacting;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Combat)
+	mutable float CurrentHealth;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Combat)
+	mutable float MaxHealth;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Combat)
+	mutable float BaseDamage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement)
+	mutable float BaseSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement)
+	mutable float WalkModifier;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement)
+	mutable float SprintModifier;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement)
+	mutable float MovementModifier;
+
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	// Camera elements
@@ -112,4 +135,6 @@ protected:
 
 	FVector MaxCameraHeight = FVector(0, 0, MaxCameraZoom/2);
 	FVector MinCameraHeight = FVector(0, 0, MinCameraZoom);
+
+	AMyGameStateBase* MyGameStateBase;
 };

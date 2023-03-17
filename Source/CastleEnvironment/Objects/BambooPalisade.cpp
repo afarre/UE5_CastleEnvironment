@@ -3,7 +3,8 @@
 
 #include "BambooPalisade.h"
 
-#include "ParentCharacter.h"
+#include "CastleEnvironment/MyGameStateBase.h"
+#include "CastleEnvironment/Characters/ParentEnemy.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/BoxComponent.h"
 
@@ -47,9 +48,8 @@ void ABambooPalisade::NotifyActorBeginOverlap(AActor* OtherActor) {
 	Super::NotifyActorBeginOverlap(OtherActor);
 	// Notifies when hitting the capsule component
 	UE_LOG(LogTemp, Warning, TEXT("NotifyActorBeginOverlap"),);
-	//const APirate* APirate = Cast<class APirate>(GetWorld()->GetFirstPlayerController()->GetCharacter());
-	if (AParentCharacter* ParentCharacter = Cast<AParentCharacter>(OtherActor)) {
-		MyGameStateBase->TakeDamage(ParentCharacter, .1f);
+	if (OtherActor) {
+		MyGameStateBase->TakeDamage(OtherActor, .1f);
 	}
 }
 

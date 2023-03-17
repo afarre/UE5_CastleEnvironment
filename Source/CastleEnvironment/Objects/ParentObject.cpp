@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "ParentObject.h"
-#include "MyGameStateBase.h"
+#include "CastleEnvironment/MyGameStateBase.h"
 
 // Sets default values
 AParentObject::AParentObject()

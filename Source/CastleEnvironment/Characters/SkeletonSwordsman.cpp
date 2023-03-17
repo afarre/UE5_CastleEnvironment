@@ -4,8 +4,7 @@
 #include "SkeletonSwordsman.h"
 
 // Sets default values
-ASkeletonSwordsman::ASkeletonSwordsman()
-{
+ASkeletonSwordsman::ASkeletonSwordsman() {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	
@@ -17,23 +16,17 @@ ASkeletonSwordsman::ASkeletonSwordsman()
 }
 
 // Called when the game starts or when spawned
-void ASkeletonSwordsman::BeginPlay()
-{
+void ASkeletonSwordsman::BeginPlay() {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
-void ASkeletonSwordsman::Tick(float DeltaTime)
-{
+void ASkeletonSwordsman::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
-
 }
 
 // Called to bind functionality to input
-void ASkeletonSwordsman::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
+void ASkeletonSwordsman::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
 }
 

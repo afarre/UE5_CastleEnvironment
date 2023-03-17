@@ -3,12 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ParentCharacter.h"
+#include "ParentEnemy.h"
 #include "GameFramework/Character.h"
 #include "SkeletonSwordsman.generated.h"
 
 UCLASS()
-class CASTLEENVIRONMENT_API ASkeletonSwordsman : public AParentCharacter
+class CASTLEENVIRONMENT_API ASkeletonSwordsman : public AParentEnemy
 {
 	GENERATED_BODY()
 

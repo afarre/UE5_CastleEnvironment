@@ -2,6 +2,7 @@
 
 #include "WarMace.h"
 
+#include "CastleEnvironment/MyGameStateBase.h"
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
 
