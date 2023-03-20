@@ -2,7 +2,7 @@
 
 
 #include "PrimaryHUD.h"
-
+#include "CastleEnvironment/UI/StaminaAndHealth.h"
 #include "CastleEnvironment/Characters/Pirate.h"
 
 APrimaryHUD::APrimaryHUD() {
@@ -12,17 +12,17 @@ APrimaryHUD::APrimaryHUD() {
 void APrimaryHUD::BeginPlay() {
 	Super::BeginPlay();
 
-	if (HealthBarWidgetClass) {
-		HealthBarWidget = CreateWidget<UHealthBar>(GetWorld(), HealthBarWidgetClass);
+	if (HealthAndStaminaWidget) {
+		StaminaAndHealth = CreateWidget<UStaminaAndHealth>(GetWorld(), HealthAndStaminaWidget);
 
-		if (HealthBarWidget) {
-			HealthBarWidget->AddToViewport();
+		if (StaminaAndHealth) {
+			StaminaAndHealth->AddToViewport();
 		}
 	}
 }
 
 void APrimaryHUD::UpdateHP(APirate* Pirate) const {
-	HealthBarWidget->UpdatePirateHP(Pirate);
+	StaminaAndHealth->UpdatePirateHP(Pirate);
 }
 
 void APrimaryHUD::Tick(float DeltaSeconds) {
@@ -34,6 +34,10 @@ void APrimaryHUD::DrawHUD() {
 }
 
 void APrimaryHUD::FadeHealthBarAnimation() const {
-	 HealthBarWidget->FadeHealthBarAnimation();
+	 StaminaAndHealth->FadeHealthBarAnimation();
+}
+
+void APrimaryHUD::UpdateStamina(APirate* Pirate) {
+	//MaxHealthLabel;
 }
 

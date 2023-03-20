@@ -7,6 +7,7 @@
 #include "GameFramework/HUD.h"
 #include "PrimaryHUD.generated.h"
 
+class UStaminaAndHealth;
 class APirate;
 
 /**
@@ -30,21 +31,12 @@ public:
 
 	UFUNCTION()
 	void FadeHealthBarAnimation() const;
-	
+	void UpdateStamina(APirate* Pirate);
+
 	UPROPERTY(EditDefaultsOnly, Category="Widgets")
-	TSubclassOf<UUserWidget> HealthBarWidgetClass;
+	TSubclassOf<UUserWidget> HealthAndStaminaWidget;
 
 private:
-	UHealthBar* HealthBarWidget;
-	
-	// meta=(BindWidget) prompts a warning on the editor when compiling if this required Widget is missing
-	UPROPERTY(meta=(BindWidget))
-	UProgressBar* HealthProgressBar;
-	
-	UPROPERTY(meta=(BindWidget))
-	UTextBlock* CurrentHealthLabel;
-
-	UPROPERTY(meta=(BindWidget))
-	UTextBlock* MaxHealthLabel;
+	UStaminaAndHealth* StaminaAndHealth;
 	
 };

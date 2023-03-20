@@ -49,11 +49,12 @@ APirate::APirate() {
 	SprintModifier = 1.0f;
 	BaseSpeed = 1200.0f;
 	BaseDamage = .15f;
+	CurrentStamina = MaxStamina = 1.0f;
+	StaminaRegenRate = .1f;
+	StaminaDepleteRate = .05f;
 
-	Interacting = false;
-	
-	// TODO: Destroy the HP bar widget in the pirate gracefully. For now setting size to 0
-	//HealthWidget->ConditionalBeginDestroy();
+	IsInteracting = false;
+	IsSprinting = false;
 }
 
 // Called when the game starts or when spawned
@@ -62,9 +63,6 @@ void APirate::BeginPlay() {
 	CharacterMovementComponent = GetCharacterMovement();
 	CharacterMovementComponent->MaxWalkSpeed = BaseSpeed;
 
-	//HealthBarClass = Cast<UHealthBarWidgetClass>(HealthWidgetComponent->GetUserWidgetObject());
-	//HealthBarClass->SetPirateParent(this);
-	
 	// Get the player controller, though it needs to be casted from AController (getter) to APlayerController
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController())) {
 		// Get the "Enhanced Input Local Player Subsystem" blueprint 
@@ -72,6 +70,18 @@ void APirate::BeginPlay() {
 			// Assign our mapping context to the aforementioned Subsystem
 			Subsystem->AddMappingContext(PirateMappingContext, 0);
 		}
+	}
+}
+
+// Called every frame
+void APirate::Tick(float DeltaTime) {
+	Super::Tick(DeltaTime);
+	if (IsSprinting) {
+		CurrentStamina = FMath::FInterpConstantTo(CurrentStamina, 0, DeltaTime, StaminaDepleteRate);
+		Cast<APrimaryHUD>(GetWorld()->GetFirstPlayerController()->GetHUD())->UpdateStamina(this);
+	} else if (CurrentStamina < MaxStamina) {
+		CurrentStamina = FMath::FInterpConstantTo(CurrentStamina, MaxStamina, DeltaTime, StaminaRegenRate);
+		Cast<APrimaryHUD>(GetWorld()->GetFirstPlayerController()->GetHUD())->UpdateStamina(this);
 	}
 }
 
@@ -85,7 +95,7 @@ void APirate::Move(const FInputActionValue& Value) {
 		//UE_LOG(LogTemp, Warning, TEXT("IA_Move triggered"));
 		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("IA_Move triggered (screen)"));
 		//UE_LOG(LogTemp, Log, TEXT("Movement vector: %s"), *DirectionValue.ToString());
-		
+
 		const FVector Forward = GetActorForwardVector();
 		//UE_LOG(LogTemp, Log, TEXT("Forward vector: %s"), *Forward.ToString());
 		const FVector Sideways = GetActorRightVector();
@@ -142,26 +152,26 @@ void APirate::CameraZoom(const FInputActionValue& Value) {
 			// TODO: Camera scroll range disparity may be due to different implementations of FMath::Clamp and ClampVector
 			CameraBoom->SetRelativeLocation(ClampVector(CameraBoom->GetRelativeLocation() + (-TransformedVector * ZoomStep / 2), MinCameraHeight, MaxCameraHeight));
 			CameraBoom->TargetArmLength = FMath::Clamp(NewTargetArmLenght, MinCameraZoom, MaxCameraZoom);
-			UE_LOG(LogTemp, Warning, TEXT("Interacting value = %d"), Interacting);
+			UE_LOG(LogTemp, Warning, TEXT("Interacting value = %d"), IsInteracting);
 		}
 	}
 }
 
 void APirate::StartInteract(const FInputActionValue& Value) {
 	if (GetController()) {
-		Interacting = Value.Get<bool>();
+		IsInteracting = Value.Get<bool>();
 		TArray<AActor*> OverlappingActors;
 		GetOverlappingActors(OverlappingActors);
 		if (const int NumberElements = OverlappingActors.Num(); NumberElements > 0) {
 			UE_LOG(LogTemp, Warning, TEXT("InteractWithOverlap"),);
-			MyGameStateBase->InteractWithOverlap(this, OverlappingActors);
+			MyGameStateBase->InteractWithOverlap(this, OverlappingActors, GetWorld());
 		}
 	}
 }
 
 void APirate::CompletedInteract(const FInputActionValue& Value) {
 	if (GetController()) {
-		Interacting = Value.Get<bool>();
+		IsInteracting = Value.Get<bool>();
 		UE_LOG(LogTemp, Warning, TEXT("Completed Interacting Value = %d"), Value.Get<bool>());
 	}
 }
@@ -172,15 +182,9 @@ void APirate::TestInteraction(const FInputActionValue& Value) {
 
 void APirate::CanceledInteract(const FInputActionValue& Value) {
 	if (GetController()) {
-		Interacting = Value.Get<bool>();
+		IsInteracting = Value.Get<bool>();
 		UE_LOG(LogTemp, Warning, TEXT("Canceled Interacting Value = %d"), Value.Get<bool>());
 	}
-}
-
-// Called every frame
-void APirate::Tick(float DeltaTime) {
-	Super::Tick(DeltaTime);
-	
 }
 
 void APirate::NotifyActorBeginOverlap(AActor* OtherActor) {

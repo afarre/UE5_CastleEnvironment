@@ -19,13 +19,13 @@ public:
 	// Sets default values for this character's properties
 	AParentEnemy();
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Combat)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Health)
 	mutable float CurrentHealth;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Combat)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Health)
 	mutable float MaxHealth;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Combat)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Health)
 	mutable float BaseDamage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement)

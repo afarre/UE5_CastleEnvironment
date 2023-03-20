@@ -17,7 +17,9 @@
 void AMyGameStateBase::TakeDamage(AActor* Actor, float DamageAmount) const {
 	APirate* Pirate = Cast<APirate>(Actor);
 	AParentEnemy* ParentEnemy = Cast<AParentEnemy>(Actor);
-
+	if (GetWorld()) {
+		UE_LOG(LogTemp, Warning, TEXT("got world in take damage"),);
+	}
 	if (Pirate) {
 		UE_LOG(LogTemp, Warning, TEXT("Pirate damage taken: %f"), DamageAmount);
 		Pirate->CurrentHealth = Pirate->CurrentHealth - DamageAmount;
@@ -29,13 +31,13 @@ void AMyGameStateBase::TakeDamage(AActor* Actor, float DamageAmount) const {
 	}
 }
 
-void AMyGameStateBase::InteractWithOverlap(APirate* Pirate, TArray<AActor*> OverlappingActors) const {
+void AMyGameStateBase::InteractWithOverlap(APirate* Pirate, TArray<AActor*> OverlappingActors, UWorld* World) const {
 	// Fetch all actors of class AWarMace
 	TArray<AActor*> ActorsToFind;
-	if (GetWorld()) {
+	if (World) {
 		UE_LOG(LogTemp, Warning, TEXT("got world"),);
 	
-		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AWarMace::StaticClass(), ActorsToFind);
+		UGameplayStatics::GetAllActorsOfClass(World, AWarMace::StaticClass(), ActorsToFind);
 
 		// Iterate over each actor, casting it to AWarMace
 		for (AActor* Actor: ActorsToFind) {

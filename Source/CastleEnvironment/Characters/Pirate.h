@@ -34,15 +34,15 @@ public:
 
 	void UpdateWidgetHP(APrimaryHUD* PrimaryHUD);
 
-	bool Interacting;
+	bool IsInteracting;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Combat)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Health)
 	mutable float CurrentHealth;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Combat)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Health)
 	mutable float MaxHealth;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Combat)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Health)
 	mutable float BaseDamage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement)
@@ -57,6 +57,18 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement)
 	mutable float MovementModifier;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Stamina)
+	float MaxStamina;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Stamina)
+	float CurrentStamina;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Stamina)
+	float StaminaRegenRate;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Stamina)
+	float StaminaDepleteRate;
+	
 protected:
 	virtual void BeginPlay() override;
 
@@ -137,4 +149,7 @@ protected:
 	FVector MinCameraHeight = FVector(0, 0, MinCameraZoom);
 
 	AMyGameStateBase* MyGameStateBase;
+
+private:
+	float IsSprinting;
 };

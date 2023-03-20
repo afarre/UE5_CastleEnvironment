@@ -20,7 +20,7 @@ class CASTLEENVIRONMENT_API AMyGameStateBase : public AGameStateBase
 	
 public:
 	void TakeDamage(AActor* Actor, float DamageAmount) const;
-	void InteractWithOverlap(APirate* Pirate, TArray<AActor*> OverlappingActors) const;
+	void InteractWithOverlap(APirate* Pirate, TArray<AActor*> OverlappingActors, UWorld* World) const;
 	void DisplayPrompt();
 	void TestCounter();
 
