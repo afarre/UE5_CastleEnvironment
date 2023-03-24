@@ -33,7 +33,7 @@ void UStaminaAndHealth::SetPirateParent(APirate* Pirate) {
 }
 
 void UStaminaAndHealth::UpdatePirateHP(const APirate* Pirate) const {
-	const float HealthPercent = (Pirate->CurrentHealth / Pirate->MaxHealth);
+	const float HealthPercent = Pirate->CurrentHealth / Pirate->MaxHealth;
 	HealthProgressBar->SetPercent(HealthPercent);
 	CurrentHealthLabel->SetText(FText::AsNumber(Pirate->CurrentHealth *100));
 	MaxHealthLabel->SetText(FText::AsNumber(Pirate->MaxHealth *100));
@@ -54,6 +54,10 @@ void UStaminaAndHealth::UpdatePirateHP(const APirate* Pirate) const {
 		//HealthColour = FLinearColor(.0, 1, .068355, 1);
 		//HealthProgressBar->SetFillColorAndOpacity(HealthColour);
 	}
+}
+
+void UStaminaAndHealth::UpdatePirateStamina(APirate* Pirate) {
+	StaminaProgressBar->SetPercent(Pirate->CurrentStamina / Pirate->MaxStamina);
 }
 
 UWidgetAnimation* UStaminaAndHealth::GetAnimationByName(FName AnimationName) const {

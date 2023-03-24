@@ -25,6 +25,7 @@ public:
 	void FadeHealthBarAnimation();
 	void SetPirateParent(APirate* Pirate);
 	void UpdatePirateHP(const APirate* Pirate) const;
+	void UpdatePirateStamina(APirate* Pirate);
 
 private:
 
@@ -32,6 +33,9 @@ private:
 	
 	UPROPERTY(meta=(BindWidget))
 	UProgressBar* HealthProgressBar;
+
+	UPROPERTY(meta=(BindWidget))
+	UProgressBar* StaminaProgressBar;
 	
 	UPROPERTY(meta=(BindWidget))
 	UTextBlock* CurrentHealthLabel;
@@ -44,5 +48,4 @@ private:
 
 	UPROPERTY(meta=(BindWidgetAnim), Transient)
 	UWidgetAnimation* HealthFadeAnimation;
-	
 };

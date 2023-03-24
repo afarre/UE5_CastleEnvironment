@@ -38,6 +38,7 @@ void APrimaryHUD::FadeHealthBarAnimation() const {
 }
 
 void APrimaryHUD::UpdateStamina(APirate* Pirate) {
+	StaminaAndHealth->UpdatePirateStamina(Pirate);
 	//MaxHealthLabel;
 }
 

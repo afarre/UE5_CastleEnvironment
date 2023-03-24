@@ -13,7 +13,10 @@
 #include "CastleEnvironment/UI/PrimaryHUD.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Engine/EngineTypes.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Animation/AnimInstance.h"
+#include "TimerManager.h"
 
 // Sets default values
 APirate::APirate() {
@@ -53,8 +56,9 @@ APirate::APirate() {
 	StaminaRegenRate = .1f;
 	StaminaDepleteRate = .05f;
 
-	IsInteracting = false;
-	IsSprinting = false;
+	IsInteracting = IsSprinting = IsMoving = false;
+	CanSprint = true;
+	TimerDelay = 2.0f;
 }
 
 // Called when the game starts or when spawned
@@ -71,18 +75,52 @@ void APirate::BeginPlay() {
 			Subsystem->AddMappingContext(PirateMappingContext, 0);
 		}
 	}
+	
+	AnimInstance = GetMesh()->GetAnimInstance();
+
+	
 }
 
 // Called every frame
 void APirate::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
-	if (IsSprinting) {
-		CurrentStamina = FMath::FInterpConstantTo(CurrentStamina, 0, DeltaTime, StaminaDepleteRate);
-		Cast<APrimaryHUD>(GetWorld()->GetFirstPlayerController()->GetHUD())->UpdateStamina(this);
-	} else if (CurrentStamina < MaxStamina) {
+	
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("IsSprinting: %s"), IsSprinting ? TEXT("true") : TEXT("false")));
+	if (!IsMoving && CurrentStamina < MaxStamina) {
 		CurrentStamina = FMath::FInterpConstantTo(CurrentStamina, MaxStamina, DeltaTime, StaminaRegenRate);
 		Cast<APrimaryHUD>(GetWorld()->GetFirstPlayerController()->GetHUD())->UpdateStamina(this);
+	}else if (IsMoving && IsSprinting) {
+		if (CurrentStamina >= 0) {
+			CurrentStamina = FMath::FInterpConstantTo(CurrentStamina, 0, DeltaTime, StaminaDepleteRate);
+			Cast<APrimaryHUD>(GetWorld()->GetFirstPlayerController()->GetHUD())->UpdateStamina(this);
+			if (CurrentStamina == 0) {
+				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("SprintCooldown")));
+				CanSprint = false;
+				SprintCooldown();
+				/*
+				 * 
+				APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+				DisableInput(PlayerController);
+				 */
+			}
+		}
+	}else if (IsMoving && !IsSprinting) {
+		if (CurrentStamina < MaxStamina) {
+			CurrentStamina = FMath::FInterpConstantTo(CurrentStamina, MaxStamina, DeltaTime, StaminaRegenRate);
+			Cast<APrimaryHUD>(GetWorld()->GetFirstPlayerController()->GetHUD())->UpdateStamina(this);
+		}
 	}
+}
+
+void APirate::SprintCooldown() {
+	//GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &APirate::EnableSprinting, TimerDelay, this);
+	//TODO: Fix https://www.youtube.com/watch?v=erKB-ufMlPg&ab_channel=DerSky
+}
+
+
+void APirate::EnableSprinting() {
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("CanSprint = true")));
+    	CanSprint = true;
 }
 
 void APirate::Move(const FInputActionValue& Value) {
@@ -92,17 +130,30 @@ void APirate::Move(const FInputActionValue& Value) {
 	const FVector2d DirectionValue = Value.Get<FVector2d>();
 	if (GetController()) {
 		
-		//UE_LOG(LogTemp, Warning, TEXT("IA_Move triggered"));
-		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("IA_Move triggered (screen)"));
-		//UE_LOG(LogTemp, Log, TEXT("Movement vector: %s"), *DirectionValue.ToString());
-
 		const FVector Forward = GetActorForwardVector();
-		//UE_LOG(LogTemp, Log, TEXT("Forward vector: %s"), *Forward.ToString());
+		UE_LOG(LogTemp, Log, TEXT("Forward vector: %s"), *Forward.ToString());
 		const FVector Sideways = GetActorRightVector();
-		//const FVector Velocity = GetVelocity();
-		//UE_LOG(LogTemp, Log, TEXT("Velocity: %s"), *Velocity.ToString());
+		const FVector Velocity = GetVelocity();
+		UE_LOG(LogTemp, Warning, TEXT("DirectionValue: %s"), *DirectionValue.ToString());
+		UE_LOG(LogTemp, Warning, TEXT("Velocity: %s"), *Velocity.ToString());
+
+		IsMoving = true;
 		AddMovementInput(Forward, DirectionValue.X * MovementModifier);
 		AddMovementInput(Sideways, DirectionValue.Y * MovementModifier);
+	}
+}
+
+void APirate::MoveCancelled(const FInputActionValue& Value) {
+	if (GetController()) {
+		UE_LOG(LogTemp, Warning, TEXT("MoveCancelled"));
+		IsMoving = false;
+	}
+}
+
+void APirate::MoveCompleted(const FInputActionValue& Value) {
+	if (GetController()) {
+		UE_LOG(LogTemp, Warning, TEXT("MoveCompleted"));
+		IsMoving = false;
 	}
 }
 
@@ -123,23 +174,27 @@ void APirate::Jump(const FInputActionValue& Value) {
 }
 
 void APirate::SprintOngoing(const FInputActionValue& Value) {
-	UE_LOG(LogTemp, Warning, TEXT("IA_Sprint Ongoing"), );
-	if (GetController()) {
+	//UE_LOG(LogTemp, Warning, TEXT("IA_Sprint Ongoing"), );
+	if (GetController() && IsMoving) {
 		MovementModifier = SprintModifier;
+		IsSprinting = true;
+		GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
 	}
 }
 
 void APirate::SprintCanceled(const FInputActionValue& Value) {
-	UE_LOG(LogTemp, Warning, TEXT("IA_Sprint Canceled"), );
-	if (GetController()) {
+	//UE_LOG(LogTemp, Warning, TEXT("IA_Sprint Canceled"), );
+	if (GetController() && IsMoving) {
 		MovementModifier = WalkModifier;
+		IsSprinting = false;
 	}
 }
 
 void APirate::SprintCompleted(const FInputActionValue& Value) {
-	UE_LOG(LogTemp, Warning, TEXT("IA_Sprint Completed"), );
-	if (GetController()) {
+	//UE_LOG(LogTemp, Warning, TEXT("IA_Sprint Completed"), );
+	if (GetController() && IsMoving) {
 		MovementModifier = WalkModifier;
+		IsSprinting = false;
 	}
 }
 
@@ -152,7 +207,6 @@ void APirate::CameraZoom(const FInputActionValue& Value) {
 			// TODO: Camera scroll range disparity may be due to different implementations of FMath::Clamp and ClampVector
 			CameraBoom->SetRelativeLocation(ClampVector(CameraBoom->GetRelativeLocation() + (-TransformedVector * ZoomStep / 2), MinCameraHeight, MaxCameraHeight));
 			CameraBoom->TargetArmLength = FMath::Clamp(NewTargetArmLenght, MinCameraZoom, MaxCameraZoom);
-			UE_LOG(LogTemp, Warning, TEXT("Interacting value = %d"), IsInteracting);
 		}
 	}
 }
@@ -172,12 +226,31 @@ void APirate::StartInteract(const FInputActionValue& Value) {
 void APirate::CompletedInteract(const FInputActionValue& Value) {
 	if (GetController()) {
 		IsInteracting = Value.Get<bool>();
-		UE_LOG(LogTemp, Warning, TEXT("Completed Interacting Value = %d"), Value.Get<bool>());
 	}
 }
 
 void APirate::TestInteraction(const FInputActionValue& Value) {
 	MyGameStateBase->TestCounter();
+}
+
+void APirate::Attack(const FInputActionValue& Value) {
+	if (GetController() && AnimInstance && AnimMontage) {
+		const float MontageLength = AnimInstance->Montage_Play(AnimMontage, 1, EMontagePlayReturnType::MontageLength, 0);
+
+		if (MontageLength > 0.f) {
+			// TODO: Handle Montage in the future if needed https://forums.unrealengine.com/t/play-montage-in-c-with-onblendout-oninterrupted-etc/447184/2
+			
+			//TestDelegate.Execute();
+		} else {
+			//TODO: No idea, do something if it fails. When can an animation fail though?
+		}
+	}
+}
+
+
+void APirate::EndOfAttackAnimation() {
+	UE_LOG(LogTemp, Warning, TEXT("EndOfAttackAnimation"), );
+	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 }
 
 void APirate::CanceledInteract(const FInputActionValue& Value) {
@@ -207,6 +280,8 @@ void APirate::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 	
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent)) {
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APirate::Move);
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Canceled, this, &APirate::MoveCancelled);
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Completed, this, &APirate::MoveCompleted);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &APirate::Look);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &APirate::Jump);
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Ongoing, this, &APirate::SprintOngoing);
@@ -218,6 +293,7 @@ void APirate::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Canceled, this, &APirate::CanceledInteract);
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Completed, this, &APirate::CompletedInteract);
 		EnhancedInputComponent->BindAction(TestAction, ETriggerEvent::Completed, this, &APirate::TestInteraction);
+		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &APirate::Attack);
 	}
 }
 

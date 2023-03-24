@@ -27,6 +27,7 @@ public:
 
 	// Inline function: https://learn.microsoft.com/en-us/cpp/cpp/inline-functions-cpp?view=msvc-170
 	void SetParentCharacterOwner(AParentEnemy* ParentCharacter)/*{ParentCharacterOwner = ParentCharacter;}*/;
+	//FORCEINLINE void SetParentCharacterOwner(AParentEnemy* ParentCharacter){ParentCharacterOwner = ParentCharacter;}
 	
 	void UpdateHP() const;
 
@@ -51,5 +52,4 @@ private:
 
 	UPROPERTY(meta=(BindWidgetAnim), Transient)
 	UWidgetAnimation* HealthFadeAnimation;
-	
 };

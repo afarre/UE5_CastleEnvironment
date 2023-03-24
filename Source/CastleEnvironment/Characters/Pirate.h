@@ -15,7 +15,13 @@ class USpringArmComponent;
 class UCameraComponent;
 class UCharacterMovementComponent;
 class APrimaryHUD;
+class UAnimMontage;
+class UAnimInstance;
 struct FInputActionValue;
+struct FTimerHandle;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FDefaultAnimationDelegate);
+DECLARE_DELEGATE(FTestDelegate);
 
 UCLASS()
 class CASTLEENVIRONMENT_API APirate : public ACharacter
@@ -25,10 +31,10 @@ class CASTLEENVIRONMENT_API APirate : public ACharacter
 public:
 	// Sets default values for this character's properties
 	APirate();
-
+	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
+	
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
@@ -68,7 +74,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Stamina)
 	float StaminaDepleteRate;
+
+	UFUNCTION()
+	void EndOfAttackAnimation();
 	
+	FTestDelegate TestDelegate;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -105,9 +116,14 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	UInputAction* TestAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	UInputAction* AttackAction;
 	
 	// Define functions with the value inputted when playing
 	void Move(const FInputActionValue& Value);
+	void MoveCancelled(const FInputActionValue& Value);
+	void MoveCompleted(const FInputActionValue& Value);
 	
 	void Look(const FInputActionValue& Value);
 
@@ -124,6 +140,8 @@ protected:
 	void CompletedInteract(const FInputActionValue& Value);
 
 	void TestInteraction(const FInputActionValue& Value);
+	
+	void Attack(const FInputActionValue& Value);
 
 	UFUNCTION()
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
@@ -150,6 +168,27 @@ protected:
 
 	AMyGameStateBase* MyGameStateBase;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Animation)
+	UAnimMontage* AnimMontage;
+
 private:
-	float IsSprinting;
+	bool IsSprinting;
+
+	bool CanSprint;
+
+	bool IsMoving;
+
+	UFUNCTION()
+	void EnableSprinting();
+	
+	void SprintCooldown();
+
+	FTimerHandle TimerHandle;
+	float TimerDelay;
+
+	UPROPERTY(EditDefaultsOnly, Category= Attack)
+	UAnimationAsset* AttackAnimation;
+
+	UAnimInstance* AnimInstance;
+	
 };

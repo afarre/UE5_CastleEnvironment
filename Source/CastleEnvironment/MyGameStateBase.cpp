@@ -45,10 +45,10 @@ void AMyGameStateBase::InteractWithOverlap(APirate* Pirate, TArray<AActor*> Over
 				// Check if the item we are iterating over is overlapping with the pirate
 				if (OverlappingActors.Contains(WarMace)) {
 					UE_LOG(LogTemp, Warning, TEXT("I'm interacting with a War mace"),);
-				
+
 					WarMace->StaticMesh->SetSimulatePhysics(false);
 					WarMace->StaticMesh->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
-					WarMace->StaticMesh->AttachToComponent(Pirate->GetMesh(),  FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("LeftWeapon"));
+					WarMace->StaticMesh->AttachToComponent(Pirate->GetMesh(),  FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("RightWeapon"));
 				}
 			}
 		}
