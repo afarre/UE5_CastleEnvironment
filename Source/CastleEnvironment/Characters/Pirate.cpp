@@ -47,6 +47,7 @@ APirate::APirate() {
 	//Set FollowCamera attachment to the Camera Boom
 	FollowCamera->SetupAttachment(CameraBoom);
 
+	// Variable inits
 	CurrentHealth = MaxHealth = 1.0f;
 	MovementModifier = WalkModifier = .25f;
 	SprintModifier = 1.0f;
@@ -75,10 +76,9 @@ void APirate::BeginPlay() {
 			Subsystem->AddMappingContext(PirateMappingContext, 0);
 		}
 	}
-	
-	AnimInstance = GetMesh()->GetAnimInstance();
 
-	
+	// Init Animation Instance for our Mesh
+	AnimInstance = GetMesh()->GetAnimInstance();
 }
 
 // Called every frame
@@ -117,12 +117,41 @@ void APirate::SprintCooldown() {
 	//TODO: Fix https://www.youtube.com/watch?v=erKB-ufMlPg&ab_channel=DerSky
 }
 
+// Called to bind functionality to input
+void APirate::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-void APirate::EnableSprinting() {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("CanSprint = true")));
-    	CanSprint = true;
+	/* Old method was to bind Axis or Actions here such as:
+	 *
+	 * InputComponent->BindAxis("Horizontal", this, &AMyCharacter::HorizontalMove);
+	 * or
+	 * InputComponent->BindAction("Jump", IE_Pressed, this, &AMyCharacter::JumpAction);
+	 */
+	
+	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent)) {
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APirate::Move);
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Canceled, this, &APirate::MoveEnd);
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Completed, this, &APirate::MoveEnd);
+		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &APirate::Look);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &APirate::Jump);
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Ongoing, this, &APirate::SprintOngoing);
+		// TODO: Canceled seems to trigger when sprint is pressed <1 sec and completed >1sec. Investigate. Interestingly, interact does not seem to have this threshold and never hits CanceledInteract (keeping it just in case)
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Canceled, this, &APirate::SprintEnd);
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &APirate::SprintEnd);
+		EnhancedInputComponent->BindAction(WheelAction, ETriggerEvent::Triggered, this, &APirate::CameraZoom);
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &APirate::StartInteract);
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Canceled, this, &APirate::InteractEnd);
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Completed, this, &APirate::InteractEnd);
+		EnhancedInputComponent->BindAction(TestAction, ETriggerEvent::Completed, this, &APirate::TestInteraction);
+		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &APirate::Attack);
+	}
 }
 
+
+/**
+ * @brief Adds movement to our character based on the player's input
+ * @param Value Input value received from the player (WASD keys), a 2D vector for this particular Input Action
+ */
 void APirate::Move(const FInputActionValue& Value) {
 	// const bool CurrentValue = Value.Get<FVector2d>();
 
@@ -131,32 +160,31 @@ void APirate::Move(const FInputActionValue& Value) {
 	if (GetController()) {
 		
 		const FVector Forward = GetActorForwardVector();
-		UE_LOG(LogTemp, Log, TEXT("Forward vector: %s"), *Forward.ToString());
 		const FVector Sideways = GetActorRightVector();
-		const FVector Velocity = GetVelocity();
-		UE_LOG(LogTemp, Warning, TEXT("DirectionValue: %s"), *DirectionValue.ToString());
-		UE_LOG(LogTemp, Warning, TEXT("Velocity: %s"), *Velocity.ToString());
 
 		IsMoving = true;
 		AddMovementInput(Forward, DirectionValue.X * MovementModifier);
 		AddMovementInput(Sideways, DirectionValue.Y * MovementModifier);
+		//UE_LOG(LogTemp, Log, TEXT("Forward vector: %s"), *Forward.ToString());
+		//UE_LOG(LogTemp, Warning, TEXT("DirectionValue: %s"), *DirectionValue.ToString());
+		//UE_LOG(LogTemp, Warning, TEXT("Velocity: %s"), *GetVelocity().ToString());
 	}
 }
 
-void APirate::MoveCancelled(const FInputActionValue& Value) {
-	if (GetController()) {
-		UE_LOG(LogTemp, Warning, TEXT("MoveCancelled"));
-		IsMoving = false;
-	}
-}
-
-void APirate::MoveCompleted(const FInputActionValue& Value) {
+/**
+ * @brief Called when the move input action is cancelled
+ */
+void APirate::MoveEnd() {
 	if (GetController()) {
 		UE_LOG(LogTemp, Warning, TEXT("MoveCompleted"));
 		IsMoving = false;
 	}
 }
 
+/**
+ * @brief Handles the movement of the mouse, which in turn moves the character's camera
+ * @param Value Input value received from the player (mouse movement), a 2D vector for this particular Input Action
+ */
 void APirate::Look(const FInputActionValue& Value) {
 	const FVector2d LookAxisValue = Value.Get<FVector2d>();
 	if (GetController()) {
@@ -167,13 +195,19 @@ void APirate::Look(const FInputActionValue& Value) {
 	}
 }
 
-void APirate::Jump(const FInputActionValue& Value) {
+/**
+ * @brief Calls ACharacter's jump function
+ */
+void APirate::Jump() {
 	if (GetController()) {
 		Super::Jump();	
 	}
 }
 
-void APirate::SprintOngoing(const FInputActionValue& Value) {
+/**
+ * @brief Called as long as our character is pressing the sprint key
+ */
+void APirate::SprintOngoing() {
 	//UE_LOG(LogTemp, Warning, TEXT("IA_Sprint Ongoing"), );
 	if (GetController() && IsMoving) {
 		MovementModifier = SprintModifier;
@@ -182,7 +216,10 @@ void APirate::SprintOngoing(const FInputActionValue& Value) {
 	}
 }
 
-void APirate::SprintCanceled(const FInputActionValue& Value) {
+/**
+ * @brief Called when the sprinting input action is cancelled
+ */
+void APirate::SprintEnd() {
 	//UE_LOG(LogTemp, Warning, TEXT("IA_Sprint Canceled"), );
 	if (GetController() && IsMoving) {
 		MovementModifier = WalkModifier;
@@ -190,14 +227,18 @@ void APirate::SprintCanceled(const FInputActionValue& Value) {
 	}
 }
 
-void APirate::SprintCompleted(const FInputActionValue& Value) {
-	//UE_LOG(LogTemp, Warning, TEXT("IA_Sprint Completed"), );
-	if (GetController() && IsMoving) {
-		MovementModifier = WalkModifier;
-		IsSprinting = false;
-	}
+/**
+ * @brief Enables sprinting
+ */
+void APirate::EnableSprinting() {
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("CanSprint = true")));
+	CanSprint = true;
 }
 
+/**
+ * @brief Handles the camera zoom when the player uses the mouse's scroll wheel
+ * @param Value Input value received from the player (scroll wheel), a vector for this particular Input Action
+ */
 void APirate::CameraZoom(const FInputActionValue& Value) {
 	const FVector DirectionValue = Value.Get<FVector>();
 	if (GetController()) {
@@ -211,6 +252,10 @@ void APirate::CameraZoom(const FInputActionValue& Value) {
 	}
 }
 
+/**
+ * @brief Handles when the player presses the E key to interact with objects/people
+ * @param Value Input value received from the player (E key), a boolean for this particular Input Action
+ */
 void APirate::StartInteract(const FInputActionValue& Value) {
 	if (GetController()) {
 		IsInteracting = Value.Get<bool>();
@@ -223,19 +268,43 @@ void APirate::StartInteract(const FInputActionValue& Value) {
 	}
 }
 
-void APirate::CompletedInteract(const FInputActionValue& Value) {
+/**
+ * @brief Called when the interacting input action is completed
+ * @param Value Input value received from the player (E key), a boolean for this particular Input Action
+ */
+void APirate::InteractEnd(const FInputActionValue& Value) {
 	if (GetController()) {
 		IsInteracting = Value.Get<bool>();
 	}
 }
+
+/**
+ * @brief 
+ * @param OtherActor 
+ */
+void APirate::NotifyActorBeginOverlap(AActor* OtherActor) {
+	Super::NotifyActorBeginOverlap(OtherActor);
+	// Notifies when hitting the capsule component
+	UE_LOG(LogTemp, Warning, TEXT("NotifyActorBeginOverlap from Pirate"),);
+
+}
+
+/**
+ * @brief Calls the HUD in order for it to be aware that the character's HP widget must be updated
+ * @param PrimaryHUD A reference to this character's HUD
+ */
+void APirate::UpdateWidgetHP(APrimaryHUD* PrimaryHUD) {
+	PrimaryHUD->UpdateHP(this);
+}
+
 
 void APirate::TestInteraction(const FInputActionValue& Value) {
 	MyGameStateBase->TestCounter();
 }
 
 void APirate::Attack(const FInputActionValue& Value) {
-	if (GetController() && AnimInstance && AnimMontage) {
-		const float MontageLength = AnimInstance->Montage_Play(AnimMontage, 1, EMontagePlayReturnType::MontageLength, 0);
+	if (GetController() && AnimInstance && SlashAttackAnimMontage) {
+		const float MontageLength = AnimInstance->Montage_Play(SlashAttackAnimMontage, 1, EMontagePlayReturnType::MontageLength, 0);
 
 		if (MontageLength > 0.f) {
 			// TODO: Handle Montage in the future if needed https://forums.unrealengine.com/t/play-montage-in-c-with-onblendout-oninterrupted-etc/447184/2
@@ -251,53 +320,5 @@ void APirate::Attack(const FInputActionValue& Value) {
 void APirate::EndOfAttackAnimation() {
 	UE_LOG(LogTemp, Warning, TEXT("EndOfAttackAnimation"), );
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
-}
-
-void APirate::CanceledInteract(const FInputActionValue& Value) {
-	if (GetController()) {
-		IsInteracting = Value.Get<bool>();
-		UE_LOG(LogTemp, Warning, TEXT("Canceled Interacting Value = %d"), Value.Get<bool>());
-	}
-}
-
-void APirate::NotifyActorBeginOverlap(AActor* OtherActor) {
-	Super::NotifyActorBeginOverlap(OtherActor);
-	// Notifies when hitting the capsule component
-	UE_LOG(LogTemp, Warning, TEXT("NotifyActorBeginOverlap from Pirate"),);
-
-}
-
-// Called to bind functionality to input
-void APirate::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	/* Old method was to bind Axis or Actions here such as:
-	 *
-	 * InputComponent->BindAxis("Horizontal", this, &AMyCharacter::HorizontalMove);
-	 * or
-	 * InputComponent->BindAction("Jump", IE_Pressed, this, &AMyCharacter::JumpAction);
-	 */
-	
-	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent)) {
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APirate::Move);
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Canceled, this, &APirate::MoveCancelled);
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Completed, this, &APirate::MoveCompleted);
-		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &APirate::Look);
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &APirate::Jump);
-		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Ongoing, this, &APirate::SprintOngoing);
-		// TODO: Canceled seems to trigger when sprint is pressed <1 sec and completed >1sec. Investigate. Interestingly, interact does not seem to have this threshold and never hits CanceledInteract (keeping it just in case)
-		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Canceled, this, &APirate::SprintCanceled);
-		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &APirate::SprintCompleted);
-		EnhancedInputComponent->BindAction(WheelAction, ETriggerEvent::Triggered, this, &APirate::CameraZoom);
-		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &APirate::StartInteract);
-		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Canceled, this, &APirate::CanceledInteract);
-		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Completed, this, &APirate::CompletedInteract);
-		EnhancedInputComponent->BindAction(TestAction, ETriggerEvent::Completed, this, &APirate::TestInteraction);
-		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &APirate::Attack);
-	}
-}
-
-void APirate::UpdateWidgetHP(APrimaryHUD* PrimaryHUD) {
-	PrimaryHUD->UpdateHP(this);
 }
 

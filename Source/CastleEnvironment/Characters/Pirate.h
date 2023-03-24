@@ -122,22 +122,19 @@ protected:
 	
 	// Define functions with the value inputted when playing
 	void Move(const FInputActionValue& Value);
-	void MoveCancelled(const FInputActionValue& Value);
-	void MoveCompleted(const FInputActionValue& Value);
+	void MoveEnd();
 	
 	void Look(const FInputActionValue& Value);
 
-	void Jump(const FInputActionValue& Value);
+	void Jump();
 
-	void SprintOngoing(const FInputActionValue& Value);
-	void SprintCanceled(const FInputActionValue& Value);
-	void SprintCompleted(const FInputActionValue& Value);
+	void SprintOngoing();
+	void SprintEnd();
 
 	void CameraZoom(const FInputActionValue& Value);
 
 	void StartInteract(const FInputActionValue& Value);
-	void CanceledInteract(const FInputActionValue& Value);
-	void CompletedInteract(const FInputActionValue& Value);
+	void InteractEnd(const FInputActionValue& Value);
 
 	void TestInteraction(const FInputActionValue& Value);
 	
@@ -166,16 +163,17 @@ protected:
 	FVector MaxCameraHeight = FVector(0, 0, MaxCameraZoom/2);
 	FVector MinCameraHeight = FVector(0, 0, MinCameraZoom);
 
+	// My Game State Base pointer (controller)
 	AMyGameStateBase* MyGameStateBase;
 
+	// Slash attach animation montage for this character
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Animation)
-	UAnimMontage* AnimMontage;
+	UAnimMontage* SlashAttackAnimMontage;
 
 private:
+	// Move and sprint flow control boolean variables
 	bool IsSprinting;
-
 	bool CanSprint;
-
 	bool IsMoving;
 
 	UFUNCTION()
