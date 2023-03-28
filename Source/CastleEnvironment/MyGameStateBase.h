@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameStateBase.h"
+#include "Weapons/WarMace.h"
 #include "MyGameStateBase.generated.h"
 
 class AParentEnemy;
@@ -20,11 +21,19 @@ class CASTLEENVIRONMENT_API AMyGameStateBase : public AGameStateBase
 	
 public:
 	void TakeDamage(AActor* Actor, float DamageAmount) const;
-	void InteractWithOverlap(APirate* Pirate, TArray<AActor*> OverlappingActors, UWorld* World) const;
+	void InteractWithOverlap(APirate* Pirate, TArray<AActor*> OverlappingActors, UWorld* World);
 	void DisplayPrompt();
 	void TestCounter();
+	void Attacking(APirate* Pirate, UWorld* World);
+
+	virtual void BeginPlay() override;
 
 private:
 	void OnPlayerTakeDamage(APirate* Pirate) const;
 	void OnEnemyTakeDamage(AParentEnemy* ParentEnemy) const;
+
+	TArray<AActor*> ParentWeaponArray;
+	TArray<AActor*> ParentObjectArray;
+	TArray<AActor*> ParentEnemyArray;
+	
 };

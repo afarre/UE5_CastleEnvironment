@@ -40,14 +40,14 @@ void ABambooPalisade::NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPri
 bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit) {
 	Super::NotifyHit(MyComp, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
 	// Notifies when hitting the mesh
-	UE_LOG(LogTemp, Warning, TEXT("NotifyHit"),);
+	//UE_LOG(LogTemp, Warning, TEXT("NotifyHit"),);
 }
 
 
 void ABambooPalisade::NotifyActorBeginOverlap(AActor* OtherActor) {
 	Super::NotifyActorBeginOverlap(OtherActor);
 	// Notifies when hitting the capsule component
-	UE_LOG(LogTemp, Warning, TEXT("NotifyActorBeginOverlap"),);
+	//UE_LOG(LogTemp, Warning, TEXT("NotifyActorBeginOverlap"),);
 	if (OtherActor) {
 		MyGameStateBase->TakeDamage(OtherActor, .1f);
 	}

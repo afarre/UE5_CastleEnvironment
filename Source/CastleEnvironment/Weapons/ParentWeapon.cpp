@@ -2,6 +2,7 @@
 
 #include "ParentWeapon.h"
 #include "CastleEnvironment/MyGameStateBase.h"
+#include "Components/CapsuleComponent.h"
 
 // Sets default values
 AParentWeapon::AParentWeapon()
@@ -12,18 +13,24 @@ AParentWeapon::AParentWeapon()
 }
 
 // Called when the game starts or when spawned
-void AParentWeapon::BeginPlay()
-{
+void AParentWeapon::BeginPlay() {
 	Super::BeginPlay();
 
 	MyGameStateBase = Cast<AMyGameStateBase>(GetWorld()->GetGameState());
-	
 }
 
 
 // Called every frame
-void AParentWeapon::Tick(float DeltaTime)
-{
+void AParentWeapon::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
+}
 
+void AParentWeapon::AttackEnd(UCapsuleComponent* WeaponCollisionCapsule) const {
+	WeaponCollisionCapsule->SetCollisionProfileName(MeleeCollisionProfile.Disabled);
+	WeaponCollisionCapsule->SetNotifyRigidBodyCollision(false);
+}
+
+void AParentWeapon::AttackStart(UCapsuleComponent* WeaponCollisionCapsule) const {
+	WeaponCollisionCapsule->SetCollisionProfileName(MeleeCollisionProfile.Enabled);
+	WeaponCollisionCapsule->SetNotifyRigidBodyCollision(true);
 }

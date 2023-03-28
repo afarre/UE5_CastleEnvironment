@@ -9,6 +9,9 @@
 #include "Pirate.generated.h"
 
 // Forward declarations
+class USoundCue;
+class AWarMace;
+class AParentWeapon;
 class UInputMappingContext;
 class UInputAction;
 class USpringArmComponent;
@@ -74,12 +77,23 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Stamina)
 	float StaminaDepleteRate;
+	
+	const AWarMace* WieldedWeapon;
 
 	UFUNCTION()
 	void EndOfAttackAnimation();
 	
 	FTestDelegate TestDelegate;
 
+	//UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Audio, meta = (AllowPrivateAccess = "true"))
+	USoundCue* EffortGrunt;
+
+	//UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Audio, meta = (AllowPrivateAccess = "true"))
+	USoundCue* AttackSlash;
+
+	UAudioComponent* EffortGruntAudioComponent;
+	UAudioComponent* AttackSlashAudioComponent;
+	
 protected:
 	virtual void BeginPlay() override;
 
@@ -175,6 +189,7 @@ private:
 	bool IsSprinting;
 	bool CanSprint;
 	bool IsMoving;
+	
 
 	UFUNCTION()
 	void EnableSprinting();

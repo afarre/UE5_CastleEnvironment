@@ -16,7 +16,9 @@
 #include "Engine/EngineTypes.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Animation/AnimInstance.h"
+#include "Sound/SoundCue.h"
 #include "TimerManager.h"
+#include "Components/AudioComponent.h"
 
 // Sets default values
 APirate::APirate() {
@@ -47,6 +49,22 @@ APirate::APirate() {
 	//Set FollowCamera attachment to the Camera Boom
 	FollowCamera->SetupAttachment(CameraBoom);
 
+	// Create audio components that will play Sound 
+
+	static ConstructorHelpers::FObjectFinder<USoundCue> EffortGruntCueObject(TEXT("/Script/Engine.SoundCue'/Game/Audio/S_Effort_Grunt_Cue.S_Effort_Grunt_Cue'"));
+	if (EffortGruntCueObject.Succeeded()) {
+		EffortGrunt = EffortGruntCueObject.Object;
+		EffortGruntAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("EffortGruntAudioComponent"));
+		EffortGruntAudioComponent->SetupAttachment(RootComponent);
+	}
+
+	static ConstructorHelpers::FObjectFinder<USoundCue> AttackSlashCueObject(TEXT("/Script/Engine.SoundCue'/Game/Audio/S_Slash_Cue.S_Slash_Cue'"));
+	if (AttackSlashCueObject.Succeeded()) {
+		AttackSlash = AttackSlashCueObject.Object;
+		AttackSlashAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("AttackSlashAudioComponent"));
+		AttackSlashAudioComponent->SetupAttachment(RootComponent);
+	}
+	
 	// Variable inits
 	CurrentHealth = MaxHealth = 1.0f;
 	MovementModifier = WalkModifier = .25f;
@@ -60,6 +78,7 @@ APirate::APirate() {
 	IsInteracting = IsSprinting = IsMoving = false;
 	CanSprint = true;
 	TimerDelay = 2.0f;
+	
 }
 
 // Called when the game starts or when spawned
@@ -76,9 +95,14 @@ void APirate::BeginPlay() {
 			Subsystem->AddMappingContext(PirateMappingContext, 0);
 		}
 	}
+	//MyGameStateBase = Cast<AMyGameStateBase>(GetWorld()->GetGameState());
 
 	// Init Animation Instance for our Mesh
 	AnimInstance = GetMesh()->GetAnimInstance();
+
+	// Audio binds
+	EffortGruntAudioComponent->SetSound(EffortGrunt);
+	AttackSlashAudioComponent->SetSound(AttackSlash);
 }
 
 // Called every frame
@@ -176,7 +200,7 @@ void APirate::Move(const FInputActionValue& Value) {
  */
 void APirate::MoveEnd() {
 	if (GetController()) {
-		UE_LOG(LogTemp, Warning, TEXT("MoveCompleted"));
+		//UE_LOG(LogTemp, Warning, TEXT("MoveCompleted"));
 		IsMoving = false;
 	}
 }
@@ -285,7 +309,7 @@ void APirate::InteractEnd(const FInputActionValue& Value) {
 void APirate::NotifyActorBeginOverlap(AActor* OtherActor) {
 	Super::NotifyActorBeginOverlap(OtherActor);
 	// Notifies when hitting the capsule component
-	UE_LOG(LogTemp, Warning, TEXT("NotifyActorBeginOverlap from Pirate"),);
+	//UE_LOG(LogTemp, Warning, TEXT("NotifyActorBeginOverlap from Pirate"),);
 
 }
 
@@ -304,14 +328,16 @@ void APirate::TestInteraction(const FInputActionValue& Value) {
 
 void APirate::Attack(const FInputActionValue& Value) {
 	if (GetController() && AnimInstance && SlashAttackAnimMontage) {
-		const float MontageLength = AnimInstance->Montage_Play(SlashAttackAnimMontage, 1, EMontagePlayReturnType::MontageLength, 0);
-
+		const float MontageLength = PlayAnimMontage(SlashAttackAnimMontage, 1.0f);
+		//const float MontageLength = AnimInstance->Montage_Play(SlashAttackAnimMontage, 1, EMontagePlayReturnType::MontageLength, 0);
+		MyGameStateBase->Attacking(this, GetWorld());
+		
 		if (MontageLength > 0.f) {
 			// TODO: Handle Montage in the future if needed https://forums.unrealengine.com/t/play-montage-in-c-with-onblendout-oninterrupted-etc/447184/2
 			
 			//TestDelegate.Execute();
 		} else {
-			//TODO: No idea, do something if it fails. When can an animation fail though?
+			//TODO: No idea, do something if it fails. When can an animation fail though? When interrupted by taking damage perhaps?
 		}
 	}
 }
