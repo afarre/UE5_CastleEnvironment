@@ -30,3 +30,6 @@ void ASkeletonSwordsman::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
+void ASkeletonSwordsman::ReduceHp(float DamageTaken) {
+	CurrentHealth = CurrentHealth - DamageTaken;
+}

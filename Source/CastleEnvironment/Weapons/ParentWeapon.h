@@ -16,10 +16,14 @@ struct FMeleeCollisionProfile
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName Disabled;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName BlockAll;
 
 	// default constructor
 	FMeleeCollisionProfile()
 	{
+		BlockAll = FName(TEXT("BlockAll"));
 		Enabled = FName(TEXT("Weapon"));
 		Disabled = FName(TEXT("NoCollision"));
 	}
@@ -42,16 +46,17 @@ public:
 
 	void AttackEnd(UCapsuleComponent* WeaponCollisionCapsule) const;
 	void AttackStart(UCapsuleComponent* WeaponCollisionCapsule) const;
-
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Stats)
+	float BaseDamage = .25f;
+	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	AMyGameStateBase* MyGameStateBase;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Stats)
-	float BaseDamage = .1f;
-	
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Stats)
 	float BaseStaminaConsumption = .05f;
 

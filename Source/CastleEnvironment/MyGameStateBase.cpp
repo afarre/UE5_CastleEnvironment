@@ -52,10 +52,9 @@ void AMyGameStateBase::InteractWithOverlap(APirate* Pirate, TArray<AActor*> Over
 				if (OverlappingActors.Contains(WarMace)) {
 					UE_LOG(LogTemp, Warning, TEXT("I'm interacting with a War mace"),);
 
-					WarMace->DisablePickupCollisionBox();
+					WarMace->WeaponPickedUp();
 					WarMace->StaticMesh->SetSimulatePhysics(false);
-					WarMace->StaticMesh->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
-					WarMace->StaticMesh->AttachToComponent(Pirate->GetMesh(),  FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("RightWeapon"));
+					WarMace->StaticMesh->AttachToComponent(Pirate->GetMesh(),  FAttachmentTransformRules(EAttachmentRule::SnapToTarget, false), TEXT("RightWeapon"));
 					WarMace->IsWielded = true;
 					Pirate->WieldedWeapon = WarMace;
 				}
@@ -69,41 +68,11 @@ void AMyGameStateBase::DisplayPrompt() {
 	// TODO: Display "Press E to pick up" in HUD
 }
 
-void AMyGameStateBase::TestCounter() {
-	
-}
-
-void AMyGameStateBase::Attacking(APirate* Pirate, UWorld* World) {
-	if (Pirate->WieldedWeapon) {
-		Pirate->WieldedWeapon->AttackStart(Pirate->WieldedWeapon->WeaponCollisionCapsule);
-		UE_LOG(LogTemp, Warning, TEXT("Called Attack start from game state base"),);
-	}
-	/*
-	 * 
-	TArray<AActor*> OverlappingActors;
-	if (World) {
-		if (Pirate->WieldedWeapon) {
-	        Pirate->WieldedWeapon->GetOverlappingActors(OverlappingActors);
-	        if (const int NumberElements = OverlappingActors.Num(); NumberElements > 0) {
-        		for (AActor* Actor: ParentEnemyArray) {
-		            if (const ASkeletonSwordsman* SkeletonSwordsman = Cast<ASkeletonSwordsman>(Actor)) {
-        				if (OverlappingActors.Contains(SkeletonSwordsman)) {
-        					UE_LOG(LogTemp, Warning, TEXT("My attack is overlapping with a skeleton"),);
-        				}
-		            }
-        		}
-	        }
-		}
-	}
-	 */
-}
-
 void AMyGameStateBase::OnPlayerTakeDamage(APirate* Pirate) const {
 	APrimaryHUD* PrimaryHUD = Cast<APrimaryHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
-	Pirate->UpdateWidgetHP(PrimaryHUD);
-	
 	if (Pirate->CurrentHealth <= 0) {
 		// Ragdoll
+		Pirate->CurrentHealth = 0;
 		Pirate->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		Pirate->GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		Pirate->GetMesh()->SetSimulatePhysics(true);
@@ -112,11 +81,19 @@ void AMyGameStateBase::OnPlayerTakeDamage(APirate* Pirate) const {
 			PrimaryHUD->FadeHealthBarAnimation();
 		}
 	}
+	Pirate->UpdateWidgetHP(PrimaryHUD);
 }
 
 void AMyGameStateBase::OnEnemyTakeDamage(AParentEnemy* ParentEnemy) const {
-	ParentEnemy->UpdateHP();
 	if (ParentEnemy->CurrentHealth <= 0) {
-		// TODO: Ragdoll enemy
+		ParentEnemy->CurrentHealth = 0;
+		ParentEnemy->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		ParentEnemy->GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		ParentEnemy->GetMesh()->SetSimulatePhysics(true);
+			
+		if (ParentEnemy) {
+			ParentEnemy->HealthBar->FadeHealthBarAnimation();
+		}
 	}
+	ParentEnemy->UpdateHP();
 }

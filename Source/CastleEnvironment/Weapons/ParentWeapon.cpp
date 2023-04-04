@@ -25,12 +25,13 @@ void AParentWeapon::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 }
 
+
+void AParentWeapon::AttackStart(UCapsuleComponent* WeaponCollisionCapsule) const {
+	WeaponCollisionCapsule->SetCollisionProfileName(MeleeCollisionProfile.BlockAll);
+	WeaponCollisionCapsule->SetNotifyRigidBodyCollision(true);
+}
+
 void AParentWeapon::AttackEnd(UCapsuleComponent* WeaponCollisionCapsule) const {
 	WeaponCollisionCapsule->SetCollisionProfileName(MeleeCollisionProfile.Disabled);
 	WeaponCollisionCapsule->SetNotifyRigidBodyCollision(false);
-}
-
-void AParentWeapon::AttackStart(UCapsuleComponent* WeaponCollisionCapsule) const {
-	WeaponCollisionCapsule->SetCollisionProfileName(MeleeCollisionProfile.Enabled);
-	WeaponCollisionCapsule->SetNotifyRigidBodyCollision(true);
 }

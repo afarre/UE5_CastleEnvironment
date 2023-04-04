@@ -18,6 +18,13 @@ class CASTLEENVIRONMENT_API AParentEnemy : public ACharacter
 public:
 	// Sets default values for this character's properties
 	AParentEnemy();
+	
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+
+	// Called to bind functionality to input
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	void UpdateHP() const;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Health)
 	mutable float CurrentHealth;
@@ -42,22 +49,12 @@ public:
 
 	UPROPERTY(VisibleAnywhere)
 	UWidgetComponent* HealthWidgetComponent;
+
+	UHealthBar* HealthBar;
 	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	
 	AMyGameStateBase* MyGameStateBase;
-
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	void UpdateHP() const;
-
-private:
-	UHealthBar* HealthBar;
-	
 };

@@ -75,10 +75,9 @@ APirate::APirate() {
 	StaminaRegenRate = .1f;
 	StaminaDepleteRate = .05f;
 
-	IsInteracting = IsSprinting = IsMoving = false;
+	IsInteracting = IsSprinting = IsMoving = AttackConnectedFlag =false;
 	CanSprint = true;
 	TimerDelay = 2.0f;
-	
 }
 
 // Called when the game starts or when spawned
@@ -108,8 +107,8 @@ void APirate::BeginPlay() {
 // Called every frame
 void APirate::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
-	
-	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("IsSprinting: %s"), IsSprinting ? TEXT("true") : TEXT("false")));
+
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FString::Printf(TEXT("IsSprinting: %s"), IsSprinting ? TEXT("true") : TEXT("false")));
 	if (!IsMoving && CurrentStamina < MaxStamina) {
 		CurrentStamina = FMath::FInterpConstantTo(CurrentStamina, MaxStamina, DeltaTime, StaminaRegenRate);
 		Cast<APrimaryHUD>(GetWorld()->GetFirstPlayerController()->GetHUD())->UpdateStamina(this);
@@ -118,7 +117,7 @@ void APirate::Tick(float DeltaTime) {
 			CurrentStamina = FMath::FInterpConstantTo(CurrentStamina, 0, DeltaTime, StaminaDepleteRate);
 			Cast<APrimaryHUD>(GetWorld()->GetFirstPlayerController()->GetHUD())->UpdateStamina(this);
 			if (CurrentStamina == 0) {
-				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("SprintCooldown")));
+				//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("SprintCooldown")));
 				CanSprint = false;
 				SprintCooldown();
 				/*
@@ -166,7 +165,6 @@ void APirate::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &APirate::StartInteract);
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Canceled, this, &APirate::InteractEnd);
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Completed, this, &APirate::InteractEnd);
-		EnhancedInputComponent->BindAction(TestAction, ETriggerEvent::Completed, this, &APirate::TestInteraction);
 		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &APirate::Attack);
 	}
 }
@@ -255,7 +253,7 @@ void APirate::SprintEnd() {
  * @brief Enables sprinting
  */
 void APirate::EnableSprinting() {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("CanSprint = true")));
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("CanSprint = true")));
 	CanSprint = true;
 }
 
@@ -286,7 +284,7 @@ void APirate::StartInteract(const FInputActionValue& Value) {
 		TArray<AActor*> OverlappingActors;
 		GetOverlappingActors(OverlappingActors);
 		if (const int NumberElements = OverlappingActors.Num(); NumberElements > 0) {
-			UE_LOG(LogTemp, Warning, TEXT("InteractWithOverlap"),);
+			//UE_LOG(LogTemp, Warning, TEXT("InteractWithOverlap"),);
 			MyGameStateBase->InteractWithOverlap(this, OverlappingActors, GetWorld());
 		}
 	}
@@ -303,17 +301,6 @@ void APirate::InteractEnd(const FInputActionValue& Value) {
 }
 
 /**
- * @brief 
- * @param OtherActor 
- */
-void APirate::NotifyActorBeginOverlap(AActor* OtherActor) {
-	Super::NotifyActorBeginOverlap(OtherActor);
-	// Notifies when hitting the capsule component
-	//UE_LOG(LogTemp, Warning, TEXT("NotifyActorBeginOverlap from Pirate"),);
-
-}
-
-/**
  * @brief Calls the HUD in order for it to be aware that the character's HP widget must be updated
  * @param PrimaryHUD A reference to this character's HUD
  */
@@ -322,29 +309,37 @@ void APirate::UpdateWidgetHP(APrimaryHUD* PrimaryHUD) {
 }
 
 
-void APirate::TestInteraction(const FInputActionValue& Value) {
-	MyGameStateBase->TestCounter();
-}
-
-void APirate::Attack(const FInputActionValue& Value) {
+/**
+ * @brief Trriggered when the character attacks, and thus initiates the attack animation
+ */
+void APirate::Attack() {
 	if (GetController() && AnimInstance && SlashAttackAnimMontage) {
-		const float MontageLength = PlayAnimMontage(SlashAttackAnimMontage, 1.0f);
-		//const float MontageLength = AnimInstance->Montage_Play(SlashAttackAnimMontage, 1, EMontagePlayReturnType::MontageLength, 0);
-		MyGameStateBase->Attacking(this, GetWorld());
-		
-		if (MontageLength > 0.f) {
-			// TODO: Handle Montage in the future if needed https://forums.unrealengine.com/t/play-montage-in-c-with-onblendout-oninterrupted-etc/447184/2
-			
-			//TestDelegate.Execute();
-		} else {
-			//TODO: No idea, do something if it fails. When can an animation fail though? When interrupted by taking damage perhaps?
+		if (const float MontageLength = PlayAnimMontage(SlashAttackAnimMontage, 1.0f); MontageLength <= 0.f) {
+			//TODO: No idea, do something if it fails. When can an animation fail though? When interrupted by another action such as taking damage perhaps?
 		}
 	}
 }
 
+/**
+ * @brief Records if the attack from the character has connected with another actor
+ * @param AttackConnectedActor Actor that received the character's attack 
+ */
+void APirate::AttackConnected(AActor* AttackConnectedActor) {
+	AttackConnectedFlag = true;
+	if (!ConnectedEnemies.Contains(AttackConnectedActor)) {
+		ConnectedEnemies.Add(AttackConnectedActor);
+	}
+}
 
-void APirate::EndOfAttackAnimation() {
-	UE_LOG(LogTemp, Warning, TEXT("EndOfAttackAnimation"), );
-	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+/**
+ * @brief Iterates over actors that received a damaging attack and updates their HP accordingly.
+ */
+void APirate::ActOnConnectedAttacks() {
+	if (AttackConnectedFlag) {
+		for (AActor* ConnectedEnemy : ConnectedEnemies) {
+			MyGameStateBase->TakeDamage(ConnectedEnemy, WieldedWeapon->BaseDamage);
+		}
+		ConnectedEnemies.Empty();
+	}
 }
 

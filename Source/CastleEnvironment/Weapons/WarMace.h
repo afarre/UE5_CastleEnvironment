@@ -28,7 +28,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	
-	void DisablePickupCollisionBox() const;
+	void WeaponPickedUp() const;
 
 	mutable bool IsWielded;
 	
@@ -36,10 +36,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UCapsuleComponent* WeaponCollisionCapsule;
 
+	bool HasOverlapped;
+	AActor* OverlappedActor;
+
 protected:
-	UFUNCTION()
-	void WarMaceHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
-	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -51,4 +51,12 @@ protected:
 	UFUNCTION()
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 	
+	UFUNCTION()
+	void BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bBFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+	void EndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+private:
+	mutable bool HasBeenPickedUp;
 };

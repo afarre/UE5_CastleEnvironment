@@ -8,9 +8,8 @@
 
 
 void UBasicAttackAnimNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation) {
-	UE_LOG(LogTemp, Warning, TEXT("Notify basic attack"), );
 /*
- * 
+	UE_LOG(LogTemp, Warning, TEXT("Notify basic attack"), );
 	if (MeshComp && MeshComp->GetOwner()) {
 		APirate* Pirate = Cast<APirate>(MeshComp->GetOwner());
 		if (Pirate && !Pirate->EffortGruntAudioComponent->IsPlaying()) {

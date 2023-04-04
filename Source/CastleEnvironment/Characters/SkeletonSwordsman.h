@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "ParentEnemy.h"
+#include "CastleEnvironment/Weapons/WarMace.h"
 #include "GameFramework/Character.h"
 #include "SkeletonSwordsman.generated.h"
 
@@ -27,4 +28,5 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	void ReduceHp(float BaseDamage);
 };

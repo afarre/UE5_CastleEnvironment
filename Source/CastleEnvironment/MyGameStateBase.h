@@ -23,8 +23,6 @@ public:
 	void TakeDamage(AActor* Actor, float DamageAmount) const;
 	void InteractWithOverlap(APirate* Pirate, TArray<AActor*> OverlappingActors, UWorld* World);
 	void DisplayPrompt();
-	void TestCounter();
-	void Attacking(APirate* Pirate, UWorld* World);
 
 	virtual void BeginPlay() override;
 
@@ -35,5 +33,4 @@ private:
 	TArray<AActor*> ParentWeaponArray;
 	TArray<AActor*> ParentObjectArray;
 	TArray<AActor*> ParentEnemyArray;
-	
 };

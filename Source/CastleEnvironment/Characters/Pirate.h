@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "InputActionValue.h"
 #include "ParentEnemy.h"
+#include "SkeletonSwordsman.h"
 #include "GameFramework/Character.h"
 #include "Pirate.generated.h"
 
@@ -42,6 +43,10 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	void UpdateWidgetHP(APrimaryHUD* PrimaryHUD);
+	
+	void AttackConnected(AActor* AttackConnectedActor);
+
+	void ActOnConnectedAttacks();
 
 	bool IsInteracting;
 
@@ -79,9 +84,6 @@ public:
 	float StaminaDepleteRate;
 	
 	const AWarMace* WieldedWeapon;
-
-	UFUNCTION()
-	void EndOfAttackAnimation();
 	
 	FTestDelegate TestDelegate;
 
@@ -149,13 +151,8 @@ protected:
 
 	void StartInteract(const FInputActionValue& Value);
 	void InteractEnd(const FInputActionValue& Value);
-
-	void TestInteraction(const FInputActionValue& Value);
 	
-	void Attack(const FInputActionValue& Value);
-
-	UFUNCTION()
-	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
+	void Attack();
 	
 	// Variables
 	UPROPERTY()
@@ -189,7 +186,8 @@ private:
 	bool IsSprinting;
 	bool CanSprint;
 	bool IsMoving;
-	
+	bool AttackConnectedFlag;
+	TArray<AActor*> ConnectedEnemies;
 
 	UFUNCTION()
 	void EnableSprinting();
