@@ -50,15 +50,15 @@ APirate::APirate() {
 	FollowCamera->SetupAttachment(CameraBoom);
 
 	// Create audio components that will play Sound 
-
-	static ConstructorHelpers::FObjectFinder<USoundCue> EffortGruntCueObject(TEXT("/Script/Engine.SoundCue'/Game/Audio/S_Effort_Grunt_Cue.S_Effort_Grunt_Cue'"));
+	
+	static ConstructorHelpers::FObjectFinder<USoundCue> EffortGruntCueObject(TEXT("/Script/Engine.SoundCue'/Game/Audio/SC_Effort_Grunt_Cue.SC_Effort_Grunt_Cue'"));
 	if (EffortGruntCueObject.Succeeded()) {
 		EffortGrunt = EffortGruntCueObject.Object;
 		EffortGruntAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("EffortGruntAudioComponent"));
 		EffortGruntAudioComponent->SetupAttachment(RootComponent);
 	}
-
-	static ConstructorHelpers::FObjectFinder<USoundCue> AttackSlashCueObject(TEXT("/Script/Engine.SoundCue'/Game/Audio/S_Slash_Cue.S_Slash_Cue'"));
+	
+	static ConstructorHelpers::FObjectFinder<USoundCue> AttackSlashCueObject(TEXT("/Script/Engine.SoundCue'/Game/Audio/SC_Slash_Cue.SC_Slash_Cue'"));
 	if (AttackSlashCueObject.Succeeded()) {
 		AttackSlash = AttackSlashCueObject.Object;
 		AttackSlashAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("AttackSlashAudioComponent"));

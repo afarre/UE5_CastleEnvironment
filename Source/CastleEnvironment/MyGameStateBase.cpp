@@ -10,7 +10,6 @@
 #include "Animation/WidgetAnimation.h"
 #include "Characters/ParentEnemy.h"
 #include "Characters/Pirate.h"
-#include "Characters/SkeletonSwordsman.h"
 #include "Objects/ParentObject.h"
 #include "UI/PrimaryHUD.h"
 #include "Weapons/WarMace.h"
@@ -49,12 +48,12 @@ void AMyGameStateBase::InteractWithOverlap(APirate* Pirate, TArray<AActor*> Over
 		for (AActor* Actor: ActorsToFind) {
 			if (const AWarMace* WarMace = Cast<AWarMace>(Actor)) {
 				// Check if the item we are iterating over is overlapping with the pirate
-				if (OverlappingActors.Contains(WarMace)) {
+				if (OverlappingActors.Contains(WarMace) && !WarMace->IsWielded) {
 					UE_LOG(LogTemp, Warning, TEXT("I'm interacting with a War mace"),);
 
 					WarMace->WeaponPickedUp();
 					WarMace->StaticMesh->SetSimulatePhysics(false);
-					WarMace->StaticMesh->AttachToComponent(Pirate->GetMesh(),  FAttachmentTransformRules(EAttachmentRule::SnapToTarget, false), TEXT("RightWeapon"));
+					WarMace->StaticMesh->AttachToComponent(Pirate->GetMesh(), FAttachmentTransformRules(EAttachmentRule::SnapToTarget, false), TEXT("RightWeapon"));
 					WarMace->IsWielded = true;
 					Pirate->WieldedWeapon = WarMace;
 				}
@@ -87,9 +86,9 @@ void AMyGameStateBase::OnPlayerTakeDamage(APirate* Pirate) const {
 void AMyGameStateBase::OnEnemyTakeDamage(AParentEnemy* ParentEnemy) const {
 	if (ParentEnemy->CurrentHealth <= 0) {
 		ParentEnemy->CurrentHealth = 0;
-		ParentEnemy->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		ParentEnemy->GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		ParentEnemy->GetMesh()->SetSimulatePhysics(true);
+		ParentEnemy->SetActorEnableCollision(false);
 			
 		if (ParentEnemy) {
 			ParentEnemy->HealthBar->FadeHealthBarAnimation();
