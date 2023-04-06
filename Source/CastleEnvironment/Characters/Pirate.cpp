@@ -145,7 +145,6 @@ void APirate::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	/* Old method was to bind Axis or Actions here such as:
-	 *
 	 * InputComponent->BindAxis("Horizontal", this, &AMyCharacter::HorizontalMove);
 	 * or
 	 * InputComponent->BindAction("Jump", IE_Pressed, this, &AMyCharacter::JumpAction);
@@ -168,7 +167,6 @@ void APirate::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &APirate::Attack);
 	}
 }
-
 
 /**
  * @brief Adds movement to our character based on the player's input
