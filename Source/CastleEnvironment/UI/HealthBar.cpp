@@ -3,12 +3,10 @@
 
 #include "HealthBar.h"
 
-#include "MovieScene.h"
 #include "Animation/WidgetAnimation.h"
 #include "CastleEnvironment/Characters/ParentEnemy.h"
 #include "Components/TextBlock.h"
 #include "Components/ProgressBar.h"
-#include "Kismet/GameplayStatics.h"
 #include "Math/Color.h"
 #include "Containers/UnrealString.h"
 

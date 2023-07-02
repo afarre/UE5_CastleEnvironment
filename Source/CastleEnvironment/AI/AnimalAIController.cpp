@@ -7,7 +7,7 @@
 
 AAnimalAIController::AAnimalAIController(const FObjectInitializer& ObjectInitializer) {
 	// Get the necessary references
-	static ConstructorHelpers::FObjectFinder<UBehaviorTree> obj(TEXT("/Script/AIModule.BehaviorTree'/Game/AnimalVarietyPack/BT_Deer.BT_Deer'"));
+	static ConstructorHelpers::FObjectFinder<UBehaviorTree> obj(TEXT("/Script/AIModule.BehaviorTree'/Game/AnimalVarietyPack/DeerStagAndDoe/BT_Deer.BT_Deer'"));
 	if (obj.Succeeded()) {
 		BehaviorTree = obj.Object;
 	}

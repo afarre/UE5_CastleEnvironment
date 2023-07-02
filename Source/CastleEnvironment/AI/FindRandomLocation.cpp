@@ -15,7 +15,7 @@ UFindRandomLocation::UFindRandomLocation(FObjectInitializer const& ObjectInitial
 EBTNodeResult::Type UFindRandomLocation::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) {
 	// Get AI controller
 	const AAnimalAIController* Controller = Cast<AAnimalAIController>(OwnerComp.GetAIOwner());
-	APawn* Deer = Controller->GetPawn();
+	const APawn* Deer = Controller->GetPawn();
 
 	// Get Deer's location to use as the origin location
 	FVector const OriginLocation = Deer->GetActorLocation();

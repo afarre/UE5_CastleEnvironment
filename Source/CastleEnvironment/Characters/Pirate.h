@@ -6,6 +6,7 @@
 #include "InputActionValue.h"
 #include "ParentEnemy.h"
 #include "SkeletonSwordsman.h"
+#include "CastleEnvironment/UI/PauseMenu.h"
 #include "GameFramework/Character.h"
 #include "Pirate.generated.h"
 
@@ -49,6 +50,8 @@ public:
 	void ActOnConnectedAttacks();
 
 	bool IsInteracting;
+
+	bool IsPaused;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Health)
 	mutable float CurrentHealth;
@@ -135,6 +138,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	UInputAction* AttackAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	UInputAction* MenuAction;
 	
 	// Define functions with the value inputted when playing
 	void Move(const FInputActionValue& Value);
@@ -153,6 +159,8 @@ protected:
 	void InteractEnd(const FInputActionValue& Value);
 	
 	void Attack();
+
+	void Menu();
 	
 	// Variables
 	UPROPERTY()
@@ -180,6 +188,12 @@ protected:
 	// Slash attach animation montage for this character
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Animation)
 	UAnimMontage* SlashAttackAnimMontage;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UPauseMenu> PauseMenuClass;
+	
+	UPROPERTY()
+	UPauseMenu* PauseMenu;
 
 private:
 	// Move and sprint flow control boolean variables

@@ -6,19 +6,19 @@
 #include "EnhancedInputSubsystems.h"
 #include "Components/InputComponent.h"
 #include "EnhancedInputComponent.h"
-#include "VectorTypes.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "CastleEnvironment/MyGameStateBase.h"
 #include "CastleEnvironment/UI/PrimaryHUD.h"
 #include "Components/CapsuleComponent.h"
-#include "Components/WidgetComponent.h"
 #include "Engine/EngineTypes.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Animation/AnimInstance.h"
 #include "Sound/SoundCue.h"
 #include "TimerManager.h"
+#include "CastleEnvironment/UI/PauseMenu.h"
 #include "Components/AudioComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 APirate::APirate() {
@@ -48,9 +48,8 @@ APirate::APirate() {
 
 	//Set FollowCamera attachment to the Camera Boom
 	FollowCamera->SetupAttachment(CameraBoom);
-
-	// Create audio components that will play Sound 
 	
+	// Create audio components that will play Sound 
 	static ConstructorHelpers::FObjectFinder<USoundCue> EffortGruntCueObject(TEXT("/Script/Engine.SoundCue'/Game/Audio/SC_Effort_Grunt_Cue.SC_Effort_Grunt_Cue'"));
 	if (EffortGruntCueObject.Succeeded()) {
 		EffortGrunt = EffortGruntCueObject.Object;
@@ -75,7 +74,7 @@ APirate::APirate() {
 	StaminaRegenRate = .1f;
 	StaminaDepleteRate = .05f;
 
-	IsInteracting = IsSprinting = IsMoving = AttackConnectedFlag =false;
+	IsPaused = IsInteracting = IsSprinting = IsMoving = AttackConnectedFlag = false;
 	CanSprint = true;
 	TimerDelay = 2.0f;
 }
@@ -165,6 +164,7 @@ void APirate::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Canceled, this, &APirate::InteractEnd);
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Completed, this, &APirate::InteractEnd);
 		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &APirate::Attack);
+		EnhancedInputComponent->BindAction(MenuAction, ETriggerEvent::Triggered, this, &APirate::Menu);
 	}
 }
 
@@ -311,9 +311,30 @@ void APirate::UpdateWidgetHP(APrimaryHUD* PrimaryHUD) {
  * @brief Trriggered when the character attacks, and thus initiates the attack animation
  */
 void APirate::Attack() {
-	if (GetController() && AnimInstance && SlashAttackAnimMontage) {
+	if (GetController() && AnimInstance && SlashAttackAnimMontage && WieldedWeapon) {
 		if (const float MontageLength = PlayAnimMontage(SlashAttackAnimMontage, 1.0f); MontageLength <= 0.f) {
 			//TODO: No idea, do something if it fails. When can an animation fail though? When interrupted by another action such as taking damage perhaps?
+		}
+	}
+}
+
+/**
+ * @brief Handle when the player presses the escape key to access the menu
+ */
+void APirate::Menu() {
+	if (GetController()) {
+		APlayerController* PlayerController = Cast<APlayerController>(GetController());
+		//we use IsLocallyControlled() because we want to create this widget if there is a user on screen connected to this pawn as opposed to create it for remotely controlled pawn
+		if (IsPaused && PauseMenuClass && IsLocallyControlled() && PlayerController) {
+			UGameplayStatics::SetGamePaused(GetWorld(),false);
+			PauseMenu->RemoveFromParent();
+			IsPaused = false;
+		}else if (!IsPaused && PauseMenuClass && IsLocallyControlled() && PlayerController){
+			PauseMenu = CreateWidget<UPauseMenu>(PlayerController, PauseMenuClass, "PauseMenuWN");
+			check(PauseMenu);
+			UGameplayStatics::SetGamePaused(GetWorld(),true);
+			PauseMenu->AddToViewport();
+			IsPaused = true;
 		}
 	}
 }
