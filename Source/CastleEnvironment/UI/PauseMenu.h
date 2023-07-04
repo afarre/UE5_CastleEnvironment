@@ -7,6 +7,7 @@
 #include "Blueprint/UserWidget.h"
 #include "PauseMenu.generated.h"
 
+class APirate;
 /**
  * 
  */
@@ -16,16 +17,23 @@ class CASTLEENVIRONMENT_API UPauseMenu : public UUserWidget
 	GENERATED_BODY()
 
 public:
+	UFUNCTION(BlueprintCallable)
 	void Resume();
 
+	UFUNCTION(BlueprintCallable)
 	void Settings();
 
+	UFUNCTION(BlueprintCallable)
 	void Save();
-	
-	void Load();
-	
-	void Quit();
 
+	UFUNCTION(BlueprintCallable)
+	void Load();
+
+	UFUNCTION(BlueprintCallable)
+	void Quit();
+	
+	APirate* Pirate;
+	
 private:
 	UPROPERTY(meta=(BindWidget))
     UButton* ResumeButton;

@@ -84,7 +84,8 @@ void APirate::BeginPlay() {
 	Super::BeginPlay();
 	CharacterMovementComponent = GetCharacterMovement();
 	CharacterMovementComponent->MaxWalkSpeed = BaseSpeed;
-
+	Controller = Cast<APlayerController>(GetController());
+	
 	// Get the player controller, though it needs to be casted from AController (getter) to APlayerController
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController())) {
 		// Get the "Enhanced Input Local Player Subsystem" blueprint 
@@ -101,12 +102,18 @@ void APirate::BeginPlay() {
 	// Audio binds
 	EffortGruntAudioComponent->SetSound(EffortGrunt);
 	AttackSlashAudioComponent->SetSound(AttackSlash);
+
+	// Share this Pirate instance with the pause menu
+	PauseMenu = CreateWidget<UPauseMenu>(Controller, PauseMenuClass, "PauseMenuWN");
+	if (PauseMenu) {
+		PauseMenu->Pirate = this;
+	}
 }
 
 // Called every frame
 void APirate::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
-
+	
 	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FString::Printf(TEXT("IsSprinting: %s"), IsSprinting ? TEXT("true") : TEXT("false")));
 	if (!IsMoving && CurrentStamina < MaxStamina) {
 		CurrentStamina = FMath::FInterpConstantTo(CurrentStamina, MaxStamina, DeltaTime, StaminaRegenRate);
@@ -325,13 +332,23 @@ void APirate::Menu() {
 	if (GetController()) {
 		APlayerController* PlayerController = Cast<APlayerController>(GetController());
 		//we use IsLocallyControlled() because we want to create this widget if there is a user on screen connected to this pawn as opposed to create it for remotely controlled pawn
-		if (IsPaused && PauseMenuClass && IsLocallyControlled() && PlayerController) {
+		if (IsPaused && PauseMenuClass && IsLocallyControlled() && PlayerController && PauseMenu) {
+			// Disable cursor
+			Controller->bShowMouseCursor = false; 
+			Controller->bEnableClickEvents = false; 
+			Controller->bEnableMouseOverEvents = false;
+
+			// Unpause and resume game
 			UGameplayStatics::SetGamePaused(GetWorld(),false);
 			PauseMenu->RemoveFromParent();
 			IsPaused = false;
-		}else if (!IsPaused && PauseMenuClass && IsLocallyControlled() && PlayerController){
-			PauseMenu = CreateWidget<UPauseMenu>(PlayerController, PauseMenuClass, "PauseMenuWN");
-			check(PauseMenu);
+		}else if (!IsPaused && PauseMenuClass && IsLocallyControlled() && PlayerController && PauseMenu){
+			// Enable cursor
+			Controller->bShowMouseCursor = true; 
+			Controller->bEnableClickEvents = true; 
+			Controller->bEnableMouseOverEvents = true;
+
+			// Pause and show menu
 			UGameplayStatics::SetGamePaused(GetWorld(),true);
 			PauseMenu->AddToViewport();
 			IsPaused = true;

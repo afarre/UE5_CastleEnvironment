@@ -43,6 +43,8 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	virtual void BeginPlay() override;
+
 	void UpdateWidgetHP(APrimaryHUD* PrimaryHUD);
 	
 	void AttackConnected(AActor* AttackConnectedActor);
@@ -99,9 +101,6 @@ public:
 	UAudioComponent* EffortGruntAudioComponent;
 	UAudioComponent* AttackSlashAudioComponent;
 	
-protected:
-	virtual void BeginPlay() override;
-
 	// Camera elements
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Components)
 	USpringArmComponent* CameraBoom;
@@ -215,5 +214,7 @@ private:
 	UAnimationAsset* AttackAnimation;
 
 	UAnimInstance* AnimInstance;
+
+	APlayerController* Controller;
 	
 };
